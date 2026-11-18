@@ -1,0 +1,34 @@
+# EXPLAIN for GET /leagues/me/leaderboard (SQL copied from slice/src/routes/leaderboard.ts)
+# date=2026-11-17T12:00:37Z dataset: make seed-big (60000 players, 1200 leagues of 50, week 202647), after ANALYZE
+# command: docker compose exec -T db psql -U hexabout -d hexabout  (params: week=202647, player='p30001', top=50)
+
+                                                                              QUERY PLAN                                                                              
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Sort  (cost=104.15..104.19 rows=17 width=18) (actual time=0.157..0.160 rows=50 loops=1)
+   Sort Key: ((board.rank)::integer)
+   Sort Method: quicksort  Memory: 27kB
+   Buffers: shared hit=16
+   ->  Subquery Scan on board  (cost=101.89..103.80 rows=17 width=18) (actual time=0.105..0.131 rows=50 loops=1)
+         Filter: ((board.rank <= 50) OR (board.player_id = 'p30001'::text))
+         Buffers: shared hit=13
+         ->  WindowAgg  (cost=101.89..103.01 rows=50 width=30) (actual time=0.103..0.124 rows=50 loops=1)
+               Buffers: shared hit=13
+               ->  Sort  (cost=101.89..102.01 rows=50 width=22) (actual time=0.096..0.098 rows=50 loops=1)
+                     Sort Key: lm.points DESC, lm.last_win_at, lm.player_id
+                     Sort Method: quicksort  Memory: 27kB
+                     Buffers: shared hit=13
+                     ->  Nested Loop  (cost=0.70..100.47 rows=50 width=22) (actual time=0.054..0.066 rows=50 loops=1)
+                           Buffers: shared hit=7
+                           ->  Index Scan using league_members_pkey on league_members  (cost=0.41..8.43 rows=1 width=4) (actual time=0.034..0.034 rows=1 loops=1)
+                                 Index Cond: ((week_id = 202647) AND (player_id = 'p30001'::text))
+                                 Buffers: shared hit=4
+                           ->  Index Scan using league_board_idx on league_members lm  (cost=0.29..91.54 rows=50 width=22) (actual time=0.016..0.023 rows=50 loops=1)
+                                 Index Cond: (league_id = league_members.league_id)
+                                 Filter: (week_id = 202647)
+                                 Buffers: shared hit=3
+ Planning:
+   Buffers: shared hit=160
+ Planning Time: 0.733 ms
+ Execution Time: 0.391 ms
+(26 rows)
+

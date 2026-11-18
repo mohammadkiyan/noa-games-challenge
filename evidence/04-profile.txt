@@ -1,0 +1,82 @@
+Run 04: Node CPU profile under load + the bottleneck analysis that chose the fix (migration 002).
+Box = run-03 code (7 statements per report). k6: PROFILE=target TARGET_RPS=700 HOLD=60s, started with
+make box-up BOX_NODE_OPTIONS='--cpu-prof --cpu-prof-dir=/tmp/prof'. Profiler overhead => no latency from this run is used.
+.runs/04-profile/node.cpuprofile opens in Chrome DevTools; the breakdown below is self time grouped by the nearest package frame.
+
+wall 92.8 s, idle 64.5%, busy 33.0 s
+
+# self time by nearest package/app frame (incl. idle)
+ 64.5%    59.88 s  (idle)
+  7.6%     7.02 s  fastify
+  7.1%     6.58 s  pg
+  6.0%     5.57 s  node-core
+  3.8%     3.56 s  pg-protocol
+  3.0%     2.80 s  (program)
+  2.3%     2.13 s  sonic-boom
+  1.4%     1.34 s  pino
+  1.0%     0.92 s  (garbage collector)
+  0.9%     0.82 s  pg-pool
+  0.5%     0.46 s  pg-types
+  0.4%     0.35 s  app:metrics.ts
+  0.3%     0.31 s  find-my-way
+  0.3%     0.27 s  app:db.ts
+  0.2%     0.23 s  app:leaderboard.ts
+  0.2%     0.20 s  secure-json-parse
+  0.2%     0.17 s  app:reportMatch.ts
+  0.1%     0.08 s  ajv
+  0.1%     0.06 s  app:auth.ts
+  0.0%     0.02 s  toad-cache
+
+# socket writev (5.33 s) by caller: HTTP response (node:_http_outgoing end) 3.06 s, pg query submit 2.27 s
+
+================================================================================
+Bottleneck analysis after run 3 (knee). Every input below is copied from a file in evidence/;
+derived numbers show their math.
+
+Sources
+  K  = evidence/03-knee.txt   (per-step table; CPU split now robust to exiting processes,
+                                    quota-hit = nr_throttled / (wall s / 0.1 s) because run 3
+                                    predates the nr_periods column, so it is approximate)
+  Q  = .runs/03-knee/snapshots.txt, section pgss (pg_stat_statements, whole knee run)
+  NP = the profile above (Node --cpu-prof, 700 rps target profile, 60 s hold;
+                                    profiler overhead => latencies from that run are NOT used)
+
+1. CPU is the first resource to run out (K)
+   step  rps  box CPU  quota hit  loop-delay p99  pool-wait p95  active conns avg/max  p95
+     5   500   78.7%      4.4%        11.0 ms        0.03 ms         0.15 / 1          6.4 ms
+     6   600   86.9%      8.3%        11.8 ms        0.03 ms         0.75 / 3          6.4 ms
+     7   700   92.1%     30.7%        29.1 ms        0.03 ms         0.20 / 1          7.1 ms
+     8   800   97.4%     74.5%        80.9 ms       16.53 ms         0.67 / 5         79.6 ms
+     9   900  100.0%    ~100%         82.5 ms      501.29 ms         3.00 / 7        511.2 ms  FAIL
+   Not the limit:
+     memory  memory.events high/max/oom/oom_kill all 0; pgmajfault 3 (.runs/03-knee/snapshots.txt)
+     disk    blks_read +18,955 vs blks_hit +6,779,045 over the run (.runs/03-knee/snapshots.txt pgstat_before/after)
+     conns   active backends avg <= 0.75 through step 8 (pool size 10, max_connections 20)
+   Order of events: CPU ~92% -> CFS quota hit in 31% of periods -> event-loop delay p99 x2.6
+   -> (step 8) pool wait appears. Pool wait is a symptom of CPU starvation, not the cause.
+
+2. Where the CPU goes
+   Split at step 5 (K): node 53.9% / postgres 46.1% of 78.7% box CPU, 500.1 rps achieved
+     postgres CPU per request = 0.787 * 0.461 / 500.1 = 0.725 ms
+     node     CPU per request = 0.787 * 0.539 / 500.1 = 0.848 ms
+   Postgres statement execution per request (Q), excluding advisory-lock wait (sleep, not CPU):
+     sum total_ms (leaderboard, both INSERTs, UPDATE, SELECT other, BEGIN, COMMIT) = 31,271.879 ms
+     requests = 180,654 leaderboard + 45,715 report = 226,369
+     => 0.138 ms/request executing; 0.725 - 0.138 = 0.587 ms (81%) of postgres CPU per request
+        is spent outside statement execution (protocol, parse/plan, txn start/commit, wakeups).
+   Round trips (Q calls):
+     report statements = 45,715 BEGIN + 45,715 lock + 45,715 INSERT + 45,273 SELECT
+                       + 22,636 INSERT result + 22,636 UPDATE + 45,715 COMMIT = 273,405
+                       => 273,405 / 45,715 = 5.98 round trips per report
+     all = 273,405 + 180,654 = 454,059 => 2.006 per request; reports cause 60.2% of them
+       while being 20.2% of requests.
+   Node (NP): busy 33.0 s of 92.8 s wall
+     pg client stack (pg 6.58 + pg-protocol 3.56 + pg-pool 0.82 + pg-types 0.46) = 11.42 s = 34.6%
+       of which socket writev from pg submit = 2.27 s
+     fastify 7.02 s = 21.3% (incl. HTTP response writev 3.06 s)
+     logging (pino 1.34 + sonic-boom 2.13) = 3.47 s = 10.5%
+
+3. Conclusion
+   First bottleneck: the single vCPU. The largest piece of avoidable CPU is per-round-trip
+   overhead, on both sides of the socket, and ~60% of round trips come from the 6-statement
+   report transaction.

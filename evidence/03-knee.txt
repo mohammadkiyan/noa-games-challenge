@@ -1,0 +1,22 @@
+03-knee  profile=knee  k6_exit=99
+  code: BEFORE the fix (report = 7 SQL round trips in app code); the post-fix runs are 06+
+  reproduce: make box-up && make measure PROFILE=knee   (dataset: make box-seed, see evidence/seed.txt)
+  run: date_utc=2026-11-17T20:37:36.746Z git=none dirty=49
+  host: Model name: 12th Gen Intel(R) Core(TM) i7-1255U | CPU(s): 12 | other_running_containers=noa-games-challenge-db-1 decor-shargh-postgres-1 decor-shargh-gotenberg-1 decor-shargh-mailpit-1 decor-shargh-minio-1
+  box: nano_cpus=1000000000 memory=1073741824 memory_swap=1073741824 cpuset= | node=v22.23.5 | PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) | shared_buffers=32768 8kB max_connections=20 synchronous_commit=on
+  checks: leaderboard 200: 180519 ok / 0 fail | pair -> one 201 and one 202: 22616 ok / 0 fail | duplicate -> 200: 441 ok / 0 fail | dropped_iterations 442
+  step offered achieved  p95    p99   err%   lb_p95 rep_p95 | cpu% thr% node% pg%  act_avg/max pool_p95 dbapp_p95(lb/rep) elu  loop_p99 memhit | pass
+     1     100    100.1    8.4    9.8   0.00     3.5     9.8 | 26.2  0.0  54.5 45.5    0.00/0      0.05 2.1/8.0 0.12   11.4      - | PASS
+     2     200    199.6    7.2    8.4   0.00     2.7     8.4 | 42.1  0.0  53.1 46.9    0.02/1      0.04 1.7/7.2 0.19   11.2      - | PASS
+     3     300    299.5    7.0    8.0   0.00     2.3     8.0 | 57.3  0.0  52.4 47.6    0.72/2      0.03 1.4/6.9 0.26   11.2      - | PASS
+     4     400    400.1    6.7    7.7   0.00     2.1     7.7 | 68.6  1.9  53.7 46.3    0.27/1      0.03 1.3/6.7 0.32   11.1      - | PASS
+     5     500    500.1    6.4    8.1   0.00     2.0     7.7 | 78.7  4.4  53.9 46.1    0.15/1      0.03 1.3/6.7 0.37   11.0      - | PASS
+     6     600    600.4    6.4   12.8   0.00     2.0     7.6 | 86.9  8.3  52.8 47.2    0.75/3      0.03 1.2/6.6 0.41   11.8      - | PASS
+     7     700    700.5    7.1   26.6   0.00     3.9    11.3 | 92.1 30.7  52.2 47.8    0.20/1      0.03 1.5/7.5 0.43   29.1      - | PASS
+     8     800    799.6   79.6  195.8   0.00    73.6   105.1 | 97.4 74.5  48.3 51.7    0.67/5     16.53 4.1/17.9 0.49   80.9      - | PASS
+     9     900    842.7  511.2  555.5   0.00   505.1   529.8 | 100.0 100.8  40.2 59.8    3.00/7    501.29 68.5/91.9 0.66   82.5      - | FAIL (aborted after 12 s)
+  KNEE (last consecutive step with p95<300 ms and errors<1%): 800 rps
+  DB time/request, server (pg_stat_statements, whole run): leaderboard mean 0.1329 ms | report mean 1.5238 ms
+  C7 bytes/row before run (total incl. indexes): league_members 157.0 (60000 rows) | match_results 177.7 (1447427 rows) | match_reports 188.3 (2903854 rows) | DB 783 MiB
+  C7 growth during run (delta total_bytes / delta rows): match_results 184.2 (+22636 rows) | match_reports 182.8 (+45273 rows)
+  DB block reads (pg_stat_statements top 30): 18990 read from disk/page cache in 283.1 ms = 0.015 ms/block | 3893560 shared_buffers hits

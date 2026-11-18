@@ -1,0 +1,22 @@
+12-target-cache  profile=target  k6_exit=0
+  reproduce: make box-up && make measure PROFILE=target LABEL=target-cache   (dataset: make box-seed, see evidence/seed.txt)
+  run: date_utc=2026-11-18T21:44:30.960Z git=none dirty_files=51
+  host: Model name: 12th Gen Intel(R) Core(TM) i7-1255U | CPU(s): 12 | other_running_containers=noa-games-challenge-db-1 decor-shargh-postgres-1 decor-shargh-gotenberg-1 decor-shargh-mailpit-1 decor-shargh-minio-1
+  box: nano_cpus=1000000000 memory=1073741824 memory_swap=1073741824 cpuset= | node=v22.23.5 app_pool_size=10 leaderboard_cache_ms=2000 | PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) | shared_buffers=32768 8kB max_connections=20 synchronous_commit=on
+  checks: leaderboard 200: 58335 ok / 0 fail | pair -> one 201 and one 202: 7304 ok / 0 fail | duplicate -> 200: 142 ok / 0 fail | dropped_iterations 0
+  steady 120s: target 540 rps, achieved 541.1 rps (64928 req)
+  latency ms: all p95 3.8 p99 5.9 max 86.5 | leaderboard p95 1.9 p99 4.3 | report p95 4.7 p99 9.0
+  errors: 0.000% (0 of 64928)
+  SLO p95<300 p99<800 err<0.1%: PASS
+  DB time/request, server (pg_stat_statements, whole run incl. ramp): leaderboard mean 0.1034 ms per SQL call (35239 calls, max stmt 69.215 ms) | report mean 0.8085 ms per SQL call (14750 calls, max stmt 76.554 ms)
+  DB time/request, app connect->release (ms): leaderboard mean 0.45 p95 1.05 p99 1.69 (n=49680) | report mean 2.13 p95 3.29 p99 5.36 (n=12544)
+  leaderboard cache (2000 ms): 20230 of 49680 reads served without SQL (40.7%); they count as 0 ms DB time below
+  DB time/request, all requests (C9): mean 0.786 p95 2.513 p99 3.443 ms (n=62224) | Little's law: 541.1 req/s x 0.786 ms = 0.43 connections held
+  pool wait (ms): leaderboard p95 0.035 p99 0.051 max 10.1 | report p95 0.028 p99 0.044 max 8.1 | waiting_max 21
+  busy DB conns (pg_stat_activity active, 118 x 1 s): avg 0.28 max 2 | idle-in-tx avg 0.00 | samples with Lock 5, LWLock 0, IO 11
+  box CPU 56.4% of one CPU (limit 1 CPU), quota hit in 1.8% of 100-ms periods | split node 69.1% / postgres 30.9% | mem max 1024 MiB (anon 87), memory.max hits 1316
+  node event loop: utilization avg 0.34, delay p99 max 11.9 ms (23 windows)
+  C7 bytes/row before run (total incl. indexes): league_members 158.1 (60000 rows) | match_results 178.2 (1575442 rows) | match_reports 188.3 (3159885 rows) | DB 852 MiB
+  C7 growth during run (delta total_bytes / delta rows): match_results 173.8 (+7304 rows) | match_reports 203.0 (+14608 rows)
+  DB block reads (pg_stat_statements top 30): 5237 read from disk/page cache in 1059.0 ms = 0.202 ms/block | 943575 shared_buffers hits
+  memory.events during run: max +2893, oom +0, oom_kill +0

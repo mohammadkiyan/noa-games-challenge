@@ -1,0 +1,11 @@
+# make id-size  date=2026-11-18T21:32:13Z  (scripts/id-size.sql)
+  table_copy   |  rows  | total_bytes_per_row | vs_seeded 
+---------------+--------+---------------------+-----------
+ res_seeded    | 200000 |               161.6 |      1.00
+ res_uuid_text | 200000 |               219.3 |      1.36
+ res_uuid_type | 200000 |               126.2 |      0.78
+ rep_seeded    | 200000 |               167.7 |      1.00
+ rep_uuid_text | 200000 |               296.7 |      1.77
+ rep_uuid_type | 200000 |               152.1 |      0.91
+(6 rows)
+

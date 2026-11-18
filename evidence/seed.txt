@@ -1,0 +1,14 @@
+# make box-seed (defaults) date=2026-11-17T20:26:14Z
+           \
+seed: players=60000 league_size=50 days=6 matches/player/day=8 disputed=3000 half=3000 id_format=uuid week=202647
+  league_members: 60000 rows in 1200 leagues
+  agreed: 1440000 matches in 27843 ms
+  disputed: 3000 matches in 35 ms
+  half: 3000 matches in 24 ms
+  VACUUM ANALYZE in 3046 ms
+  count league_members = 60000
+  count match_results = 1440000
+  count match_reports = 2889000
+  database size = 779 MB (817036311 bytes)
+seed done in 31597 ms
+wall=31.73s
