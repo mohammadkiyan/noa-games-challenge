@@ -1,0 +1,44 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: hexabout
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ci -d hexabout"
+          --health-interval 2s --health-timeout 3s --health-retries 30
+    env:
+      DATABASE_URL: postgres://ci:ci@localhost:5432/hexabout
+      TEST_ADMIN_DATABASE_URL: postgres://ci:ci@localhost:5432/postgres
+    defaults:
+      run:
+        working-directory: slice
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: slice/package-lock.json
+      - name: install
+        run: npm ci
+      - name: typecheck
+        run: npm run typecheck
+      - name: migrate (fresh database)
+        run: npm run migrate
+      - name: test
+        run: npm test
+      - name: docs-check
+        working-directory: .
+        run: ./scripts/docs-check.sh
