@@ -1,0 +1,6 @@
+node_modules/
+.env
+*.log
+
+# raw load-test output (make measure); the committed summaries are in evidence/
+.runs/
