@@ -6,14 +6,12 @@ Version check → play a match → winner sees +1 instantly, confirmed in second
 ## 2. Scope (MoSCoW)
 | | Item |
 |---|---|
-| **Must** | Minimum app version for Leagues |
-| **Must** | Join a same-tier league of 50 on first weekly match |
-| **Must** | +1 per win, no draws; ties ordered by who got there first |
-| **Must** | Leaderboard: optimistic local update, polling sync; disputed results greyed out, no pop-ups |
+| **Must** | Minimum app version; join a same-tier league of 50 on first weekly match |
+| **Must** | +1 per win, no draws; ties: first to reach it wins |
+| **Must** | Leaderboard: optimistic update, polling sync; disputed results greyed out |
 | **Must** | Global weekly reset: points → 0, tier stays; unfinished matches don't count |
-| **Must** | 5 named tiers, promotion/demotion zones |
-| **Must** | Coins only on promotion, paid once, payout guard |
-| **Must** | Anti-cheat: dual report (one-report matches never count), rate limits, delayed payout |
+| **Must** | 5 named tiers, promotion/demotion zones; coins only on promotion, paid once, payout guard |
+| **Must** | Anti-cheat: dual report, rate limits, delayed payout |
 | **Should** | Manual first payouts; anomaly alert |
 | **Could** | One-report matches: phone retry queue → auto rule → human review |
 | **Won't** | All of §6, skill matchmaking, a match server |
@@ -29,7 +27,7 @@ Gameplay changes, coin budget system, perfect anti-cheat.
 | A3 | Cheapest Hetzner (CPX02) as floor; load test decides | Q3 |
 | A4 | Push = up to 5× peak, mostly new players | Q4 |
 | A5 | Players cheat; late rewards OK | Q5 |
-| A6 | Configurable reset time, tuned by monitoring | Decision |
+| A6 | Configurable reset time | Decision |
 | A7 | Inactive players keep their tier | Decision |
 | A8 | Leagues fill first-come-first-served | Decision |
 | A9 | Wallet ignores repeated payment keys; else manual review | Research |

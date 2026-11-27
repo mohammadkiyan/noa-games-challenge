@@ -43,3 +43,17 @@ Got:      The leaderboard cache from DESIGN.md had never been built: every earli
           docs-check now counts table cells too (PRD and DESIGN now show over cap).
 Accepted:
 Rejected:
+
+## 4. Second CAPACITY review, no new runs (2026-11-18, Claude Code / Claude Opus 5.5)
+Prompt:   pasted review ("CPU first" vs 0.80 CPU at the knee; C9 p95 looks copied; rescale disk trap; one run per
+          data point; cost table; 60k € figure; Storage Box price; Hetzner-account SPOF), then "no 30-40 min runs;
+          do the other fixes and rely on our estimation".
+Got:      Checked each claim against `evidence/` first. The throttling check the reviewer asked for was already
+          measured (`thr%` in `11`: 9.1% -> 35.5% at 1,200 -> 1,300 rps), so the doc now says "CPU quota" and cites it.
+          C9 p95 not copied: 2.511 (`07`) vs 2.513 (`12`); every read is below it, so the cache can't move it.
+          Recomputing 1,200 / (0.801 x 0.667) gave 2,246, not 2,260 (rounding): now "<= 2,250, upper bound".
+          Cost table, push-day math, knee "1 run", rescale drill in OPS.md, Hetzner-account SPOF row in DESIGN.md.
+          make docs-check found PRD (516) and DESIGN (1049) over cap; cut both.
+Accepted: all doc fixes; 2,250 upper bound without the --cpus=2 run.
+Rejected: new load runs (time). Reviewer's "a few EUR per push": (19.49 - 5.99) / 730 h x 24 h = EUR 0.44/push day.
+          Storage Box price (3.20 vs claimed 3.81) not verified either way: doc says "re-check".
