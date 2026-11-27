@@ -14,7 +14,7 @@ BIG_PLAYERS   ?= 60000
 BASE_URL      ?= http://localhost:3000
 K6_IMAGE      ?= grafana/k6:1.0.0
 
-.PHONY: up down install test seed-big measure id-size docs-check typecheck box-build box-up box-down
+.PHONY: up down install test seed-big measure id-size docs-check typecheck box-build box-up box-down verify demo benchmark-smoke
 
 # --- "Box": app + Postgres in one container sized like a Hetzner CPX02 (load tests) ---
 BOX_NAME    ?= hexabout-box
@@ -71,6 +71,22 @@ typecheck: install
 test: install
 	docker compose up -d --wait db
 	cd slice && TEST_ADMIN_DATABASE_URL='$(TEST_ADMIN_DATABASE_URL)' npm test
+
+## Complete reviewer validation (no benchmark or reseeding).
+verify: typecheck test docs-check
+
+## Exercise dual reporting, duplicate safety and leaderboard via real HTTP.
+demo:
+	BASE_URL='$(BASE_URL)' node scripts/demo.mjs
+
+## Quick status-checked smoke against the running Compose app (not historical instrumentation).
+benchmark-smoke:
+	@id=$(docker compose ps -q app); \
+	  test -n "$id" || { echo "Start the demo app with make up first" >&2; exit 1; }; \
+	  docker run --rm --network "container:$id" \
+	    --mount "type=bind,source=$(CURDIR)/slice/loadtest,target=/loadtest,readonly" \
+	    -e PROFILE=smoke -e BASE_URL=http://127.0.0.1:3000 -e PLAYERS=$(SMALL_PLAYERS) \
+	    $(K6_IMAGE) run /loadtest/reviewer-smoke.js
 
 ## Seed the load-test dataset (replaces the current week's league rows).
 seed-big:

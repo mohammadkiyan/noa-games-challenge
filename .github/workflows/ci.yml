@@ -42,3 +42,24 @@ jobs:
       - name: docs-check
         working-directory: .
         run: ./scripts/docs-check.sh
+
+  reviewer-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: slice/package-lock.json
+      - name: verify documented command
+        run: make verify
+      - name: run documented startup
+        run: make up
+      - name: dual-report HTTP demonstration
+        run: make demo
+      - name: quick benchmark smoke
+        run: make benchmark-smoke
+      - name: stop reviewer containers
+        if: always()
+        run: make down

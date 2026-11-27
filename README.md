@@ -1,47 +1,90 @@
 # Hexabout Leagues: take-home slice
 
-A thin vertical slice of weekly leagues: players report match results and read their league's leaderboard.
-Node 22 + TypeScript + Fastify + raw SQL on Postgres 16; design and evidence live in the docs next to this file.
+A thin vertical slice of weekly leagues: report match results and read a leaderboard. Node 22 + TypeScript + Fastify + raw SQL on PostgreSQL 16.
 
-Needs Docker (with compose) and, for tests, Node ≥ 22.18 with npm. Copy `.env.example` to `.env` to change ports or credentials.
+## Reviewer quick start
 
-## Run
+Prerequisites: Git, GNU Make, Bash, Docker Engine or Docker Desktop with Linux containers and Compose v2; Node.js ≥ 22.18 and npm for tests and the demo. First runs pull images and install dependencies. No external services, secrets, or manual database setup required. Defaults work without a .env file; copy .env.example only to override configuration.
 
 ```sh
-make up     # Postgres + app in Docker on :3000, migrations applied, 500 players seeded
+git clone https://github.com/mohammadkiyan/noa-games-challenge.git
+cd noa-games-challenge
+make up       # build, start PostgreSQL and app, migrate, seed 500 players
+make demo     # check the complete dual-report lifecycle
+make verify   # typecheck, integration tests, document caps
+make down     # stop containers (keeps the local volume)
+```
+
+The app listens on http://localhost:3000; PostgreSQL is published on 5433. Use free ports. For a custom app port, set PORT and BASE_URL consistently (e.g. PORT=3001 BASE_URL=http://localhost:3001).
+
+**Disposable data only:** make up reseeds the demo database, replacing match reports/results and current-week memberships. Never use it against production or shared data. The tests create and drop a separate database.
+
+## Tests
+
+```sh
+make test       # one command: install dependencies, start DB, migrate isolated DB, run Vitest
+make typecheck
+make docs-check
+```
+
+The integration suite covers concurrent reports, duplicate safety, disputes, atomic increments, week boundaries, ranking and cache invalidation. GitHub Actions runs these checks and the reviewer startup/demo workflow.
+
+## Manual API walkthrough
+
+Authentication is the intentionally fake X-Player-Id header. With the demo app running, use a fresh match ID each time:
+
+```sh
+BASE_URL=http://localhost:3000
+MATCH_ID="demo-$(date +%s)-$$"
+
+curl -fsS "$BASE_URL/healthz"
+curl -fsS "$BASE_URL/leagues/me/leaderboard" -H 'X-Player-Id: p1'
+
+# First report: 202 waiting_for_opponent; points unchanged.
+curl -i -X POST "$BASE_URL/matches/$MATCH_ID/report" \
+  -H 'X-Player-Id: p1' -H 'Content-Type: application/json' \
+  -d '{"opponentId":"p2","winnerId":"p1"}'
+
+# Second agreeing report: 201 recorded; p1 gains exactly one point.
+curl -i -X POST "$BASE_URL/matches/$MATCH_ID/report" \
+  -H 'X-Player-Id: p2' -H 'Content-Type: application/json' \
+  -d '{"opponentId":"p1","winnerId":"p1"}'
+
+# Retry: 200 duplicate; no extra point.
+curl -i -X POST "$BASE_URL/matches/$MATCH_ID/report" \
+  -H 'X-Player-Id: p2' -H 'Content-Type: application/json' \
+  -d '{"opponentId":"p1","winnerId":"p1"}'
+
+curl -fsS "$BASE_URL/leagues/me/leaderboard" -H 'X-Player-Id: p1'
+```
+
+The leaderboard returns the league's top 50 and the caller's rank/points in `me` (404 if no league). Compare `me.points` before and after: +1, regardless of the seeded starting score. `make demo` automatically asserts the statuses and scores with a unique match ID. Run it without concurrent load traffic.
+
+A report is one SQL call (`report_match()`, migrations 002 and 003) under a per-match advisory lock. Points rise only when the match result is first inserted.
+
+## Load testing
+
+Quick reviewer smoke (20 RPS for 30 seconds, with strict status checks), using the normal Compose app:
+
+```sh
+make up
+make benchmark-smoke
 make down
 ```
 
-## Test
+The smoke uses the same k6 workload as the historical tests with a separate strict-check wrapper. The default 500-player seed matches the smoke workload; keep SMALL_PLAYERS a positive multiple of 50. This writes demo reports, not benchmark evidence, and is not a capacity measurement.
+
+For the instrumented historical methodology, use a Linux Docker Engine host with Bash, curl, Node.js, standard Linux utilities, cgroup v2 and the systemd Docker cgroup path /sys/fs/cgroup/system.slice/docker-<id>.scope. Docker Desktop/rootless/custom cgroup configurations may not expose that path. See [LOADTEST.md](LOADTEST.md).
 
 ```sh
-make test       # Vitest against a throwaway database, created and dropped per run
-make typecheck
-make docs-check # word caps on the docs
+make down                  # normal app and benchmark box both use port 3000
+make box-up
+make box-seed              # destructive: 60k players and six days of history
+make measure PROFILE=target LABEL=reviewer-target
+make box-down
 ```
 
-Load tests (`make box-up`, `make measure`) are described in LOADTEST.md.
-
-## Endpoints
-
-Auth is a header: `X-Player-Id: <player id>`.
-
-Report a match result (both players report; points are awarded when the second, agreeing report arrives):
-
-```sh
-curl -X POST localhost:3000/matches/m-123/report \
-  -H 'X-Player-Id: p1' -H 'Content-Type: application/json' \
-  -d '{"opponentId":"p2","winnerId":"p1"}'
-# 202 waiting_for_opponent · 201 recorded · 200 duplicate · 409 disputed · 400 bad winner
-```
-
-A report is one SQL call (`report_match()`, migrations 002 and 003) under a per-match advisory lock; the winner's points rise by `points = points + 1` only when the match result row is first inserted.
-
-Read my league's leaderboard (top 50 plus my own rank; 404 if I have no league this week):
-
-```sh
-curl localhost:3000/leagues/me/leaderboard -H 'X-Player-Id: p1'
-```
+The target profile ramps to 540 RPS over 30 seconds and holds for two minutes; the knee profile in LOADTEST.md is longer. The original raw evidence is already in .runs/ and summaries in evidence/. A new measured run creates new numbered files; no existing evidence is overwritten. Historical runs predate migration 003; reruns on a different host are not expected to reproduce identical numbers. Set PLAYERS consistently if overriding the benchmark seed.
 
 ## Known limits
 
