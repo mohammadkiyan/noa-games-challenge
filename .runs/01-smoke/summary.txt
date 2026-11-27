@@ -1,0 +1,18 @@
+01-smoke  profile=smoke  k6_exit=0
+  reproduce: make box-up && make measure PROFILE=smoke   (dataset: make box-seed, see evidence/seed.txt)
+  run: date_utc=2026-11-17T20:33:53.385Z git=none dirty=49
+  host: n/a | n/a | n/a
+  n/a | n/a | n/a | n/a n/a n/a
+  checks: leaderboard 200: 480 ok / 0 fail | pair -> one 201 and one 202: 61 ok / 0 fail | duplicate -> 200: 3 ok / 0 fail | dropped_iterations 0
+  steady 30s: target 20 rps, achieved 20.2 rps (605 req)
+  latency ms: all p95 10.2 p99 11.9 max 14.3 | leaderboard p95 4.5 p99 5.2 | report p95 11.8 p99 13.5
+  errors: 0.000% (0 of 605)
+  SLO p95<300 p99<800 err<0.1%: PASS
+  DB time/request, server (pg_stat_statements, whole run incl. ramp): leaderboard mean 0.1983 ms (480 req, max stmt 0.952 ms) | report mean 1.3055 ms (125 req, max stmt 4.398 ms)
+  DB time/request, app connect->release (ms): leaderboard mean 1.76 p95 2.52 p99 2.81 (n=400) | report mean 5.95 p95 9.17 p99 10.00 (n=103)
+  pool wait (ms): leaderboard p95 0.099 p99 0.144 max 0.3 | report p95 0.062 p99 0.066 max 0.2 | waiting_max 0
+  busy DB conns (pg_stat_activity active, 30 x 1 s): avg 0.00 max 0 | idle-in-tx avg 0.00 | samples with Lock 0, LWLock 0, IO 0
+  box CPU 7.9% of 1 vCPU, quota hit in 0.0% of 100-ms periods | split node 66.8% / postgres 33.2% | mem max 691 MiB (anon 58)
+  node event loop: utilization avg 0.04, delay p99 max 11.5 ms (5 windows)
+  C7 bytes/row before run (total incl. indexes): league_members 155.5 (60000 rows) | match_results 177.7 (1440061 rows) | match_reports 188.3 (2889122 rows) | DB 779 MiB
+  C7 growth during run (delta total_bytes / delta rows): match_results 0.0 (+61 rows) | match_reports 268.6 (+122 rows)

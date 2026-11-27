@@ -77,7 +77,7 @@ seed-big:
 	docker compose exec -T -e PLAYERS=$(BIG_PLAYERS) app node scripts/seed.ts
 
 ## One measured k6 run against the box: make measure PROFILE=smoke|target|knee [LABEL=...]
-## Summary -> evidence/<NN>-<label>.txt, raw -> .runs/<NN>-<label>/ (never overwrites). See scripts/measure.sh.
+## Summary -> evidence/<NN>-<label>.txt, raw -> .runs/<NN>-<label>/, both committed (never overwrites). See scripts/measure.sh.
 measure:
 	PROFILE=$(PROFILE) LABEL=$(LABEL) ./scripts/measure.sh
 

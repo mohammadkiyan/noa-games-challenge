@@ -1,0 +1,14 @@
+10-knee-fine  profile=knee  k6_exit=99
+  reproduce: make box-up && make measure PROFILE=knee KNEE_START=800 KNEE_STEP=25 KNEE_MAX_STEPS=5 KNEE_WARMUP=60 LABEL=knee-fine   (dataset: make box-seed, see evidence/seed.txt)
+  run: date_utc=2026-11-18T09:44:43.165Z git=none dirty_files=50
+  host: Model name: 12th Gen Intel(R) Core(TM) i7-1255U | CPU(s): 12 | other_running_containers=noa-games-challenge-db-1 decor-shargh-postgres-1 decor-shargh-gotenberg-1 decor-shargh-mailpit-1 decor-shargh-minio-1
+  box: nano_cpus=1000000000 memory=1073741824 memory_swap=1073741824 cpuset= | node=v22.23.5 app_pool_size=10 | PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) | shared_buffers=32768 8kB max_connections=20 synchronous_commit=on
+  checks: leaderboard 200: 70329 ok / 0 fail | pair -> one 201 and one 202: 8831 ok / 0 fail | duplicate -> 200: 166 ok / 0 fail | dropped_iterations 221
+  step offered achieved  p95    p99   err%   lb_p95 rep_p95 | cpu% thr% node% pg%  act_avg/max pool_p95 dbapp_p95(lb/rep) elu  loop_p99 memhit | pass
+     1     800    800.7  109.1  175.0   0.00   107.5   115.0 | 93.0 46.9  46.9 53.1    1.14/8     97.03 5.1/7.9 0.47   82.1    551 | PASS
+     2     825    799.8  334.5  419.3   0.00   333.0   340.1 | 96.3 70.8  42.4 57.6    1.20/4    289.64 72.0/78.8 0.66   88.7    195 | FAIL (aborted after 20 s)
+  KNEE (last consecutive step with p95<300 ms and errors<1%): 800 rps
+  DB time/request, server (pg_stat_statements, whole run): leaderboard mean 0.2009 ms | report mean 1.1390 ms
+  C7 bytes/row before run (total incl. indexes): league_members 157.8 (60000 rows) | match_results 178.0 (1514491 rows) | match_reports 188.3 (3037983 rows) | DB 819 MiB
+  C7 growth during run (delta total_bytes / delta rows): match_results 197.7 (+8867 rows) | match_reports 190.3 (+17734 rows)
+  DB block reads (pg_stat_statements top 30): 6083 read from disk/page cache in 2631.0 ms = 0.433 ms/block | 1729957 shared_buffers hits

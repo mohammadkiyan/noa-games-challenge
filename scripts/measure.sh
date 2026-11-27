@@ -2,7 +2,7 @@
 # One measured load-test run against the box (make box-up). Usage:
 #   make measure PROFILE=smoke|target|knee [LABEL=<label>]  (extra k6 env: TARGET_RPS, HOLD, ...)
 # Writes the short, committed summary to evidence/<NN>-<label>.txt and the raw files to
-# .runs/<NN>-<label>/ (git-ignored; rerun to reproduce). NN = next free number; never overwrites.
+# .runs/<NN>-<label>/ (committed: the raw data behind each summary). NN = next free number; never overwrites.
 #   k6.txt         k6 stdout (K6_T0_MS marks the scenario start, k6_exit at the end)
 #   k6.json        k6 --summary-export
 #   samples.csv    every 1 s: box cgroup CPU/throttling/memory (+ memory.max hits), node vs postgres CPU ticks,

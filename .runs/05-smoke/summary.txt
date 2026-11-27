@@ -1,0 +1,18 @@
+05-smoke  profile=smoke  k6_exit=0
+  reproduce: make box-up && make measure PROFILE=smoke   (dataset: make box-seed, see evidence/seed.txt)
+  run: date_utc=2026-11-18T09:25:34.197Z git=none dirty_files=50
+  host: Model name: 12th Gen Intel(R) Core(TM) i7-1255U | CPU(s): 12 | other_running_containers=noa-games-challenge-db-1 decor-shargh-postgres-1 decor-shargh-gotenberg-1 decor-shargh-mailpit-1 decor-shargh-minio-1
+  box: nano_cpus=1000000000 memory=1073741824 memory_swap=1073741824 cpuset= | node=v22.23.5 app_pool_size=10 | PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) | shared_buffers=32768 8kB max_connections=20 synchronous_commit=on
+  checks: leaderboard 200: 481 ok / 0 fail | pair -> one 201 and one 202: 61 ok / 0 fail | dropped_iterations 0
+  steady 30s: target 20 rps, achieved 20.1 rps (603 req)
+  latency ms: all p95 7.5 p99 13.0 max 20.9 | leaderboard p95 5.6 p99 7.4 | report p95 11.4 p99 18.0
+  errors: 0.000% (0 of 603)
+  SLO p95<300 p99<800 err<0.1%: PASS
+  DB time/request, server (pg_stat_statements, whole run incl. ramp): leaderboard mean 0.3838 ms (481 req, max stmt 1.143 ms) | report mean 1.2682 ms (122 req, max stmt 4.577 ms)
+  DB time/request, app connect->release (ms): leaderboard mean 2.32 p95 3.27 p99 3.83 (n=400) | report mean 2.84 p95 3.87 p99 4.85 (n=100)
+  pool wait (ms): leaderboard p95 0.114 p99 0.166 max 0.3 | report p95 0.085 p99 0.121 max 0.1 | waiting_max 0
+  busy DB conns (pg_stat_activity active, 29 x 1 s): avg 0.03 max 1 | idle-in-tx avg 0.00 | samples with Lock 0, LWLock 0, IO 1
+  box CPU 8.8% of 1 vCPU, quota hit in 0.0% of 100-ms periods | split node 66.4% / postgres 33.6% | mem max 594 MiB (anon 55)
+  node event loop: utilization avg 0.05, delay p99 max 11.4 ms (5 windows)
+  C7 bytes/row before run (total incl. indexes): league_members 157.8 (60000 rows) | match_results 177.8 (1475328 rows) | match_reports 188.3 (2959657 rows) | DB 798 MiB
+  C7 growth during run (delta total_bytes / delta rows): match_results 402.9 (+61 rows) | match_reports 268.6 (+122 rows)

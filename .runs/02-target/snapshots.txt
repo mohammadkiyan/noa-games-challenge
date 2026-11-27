@@ -1,0 +1,145 @@
+## machine
+date_utc=2026-11-17T20:34:44.150Z git=none dirty=49
+profile=target label=target k6_env: TARGET_RPS= RAMP= HOLD= KNEE_START= KNEE_STEP= KNEE_MAX_STEPS=
+## host
+CPU(s):                                  12
+Model name:                              12th Gen Intel(R) Core(TM) i7-1255U
+Thread(s) per core:                      2
+Core(s) per socket:                      10
+CPU(s) scaling MHz:                      69%
+CPU max MHz:                             4700.0000
+CPU min MHz:                             400.0000
+mem_total_bytes=41724600320
+os=Ubuntu 24.04.5 LTS kernel=7.0.0-43-generic
+loadavg=1.05 1.15 1.15
+docker=29.9.2 k6_image=grafana/k6:1.0.0
+other_running_containers=noa-games-challenge-db-1 decor-shargh-postgres-1 decor-shargh-gotenberg-1 decor-shargh-mailpit-1 decor-shargh-minio-1 
+## box
+image=sha256:f120e438fbef329235b7bcc8cd3729b2a2f46417a4f0dd02d171195c5bbcb1a7 nano_cpus=1000000000 memory=1073741824 memory_swap=1073741824 cpuset=
+node=v22.23.5
+PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+effective_cache_size=65536 8kB
+fsync=on
+maintenance_work_mem=65536 kB
+max_connections=20
+max_wal_size=1024 MB
+random_page_cost=1.1
+shared_buffers=32768 8kB
+shared_preload_libraries=pg_stat_statements
+synchronous_commit=on
+track_io_timing=on
+wal_level=replica
+work_mem=4096 kB
+app_pool_size=10
+
+## sizes_before
+table_name,row_count,heap_bytes,index_bytes,total_bytes,heap_bytes_per_row,index_bytes_per_row,total_bytes_per_row
+league_members,60000,3645440,5644288,9330688,60.8,94.1,155.5
+match_results,1440122,144457728,111312896,255844352,100.3,77.3,177.7
+match_reports,2889244,287473664,256458752,544047104,99.5,88.8,188.3
+DATABASE,,,,817110039,,,
+
+## pgstat_before
+-[ RECORD 1 ]--+------------------------------
+at             | 2026-11-17 20:34:45.577402+00
+xact_commit    | 1385
+xact_rollback  | 0
+blks_read      | 109450
+blks_hit       | 208436
+tup_inserted   | 366
+tup_updated    | 122
+deadlocks      | 0
+temp_bytes     | 0
+blk_read_time  | 220.086
+blk_write_time | 0.384
+
+-[ RECORD 1 ]---------+------------------------------
+checkpoints_timed     | 0
+checkpoints_req       | 1
+checkpoint_write_time | 152
+checkpoint_sync_time  | 412
+buffers_checkpoint    | 32566
+buffers_clean         | 887
+maxwritten_clean      | 8
+buffers_backend       | 140526
+buffers_backend_fsync | 0
+buffers_alloc         | 175961
+stats_reset           | 2026-11-17 20:32:28.324725+00
+
+-[ RECORD 1 ]----+------------------------------
+wal_records      | 1948
+wal_fpi          | 571
+wal_bytes        | 3776457
+wal_buffers_full | 0
+wal_write        | 299
+wal_sync         | 298
+wal_write_time   | 14.61
+wal_sync_time    | 294.187
+stats_reset      | 2026-11-17 20:32:28.324725+00
+
+## pgss
+calls,total_ms,mean_ms,stddev_ms,max_ms,rows,shared_blks_hit,shared_blks_read,blk_read_ms,wal_bytes,query
+14734,13147.739,0.8923,1.2381,42.696,14734,0,0,0.000,0,SELECT pg_advisory_xact_lock(hashtext($1))
+58336,6203.274,0.1063,0.2192,35.408,2916800,822027,143,3.314,378604,"WITH me AS ( SELECT league_id FROM league_members WHERE week_id = $1 AND player_id = $2 ), board AS ( SELECT lm.league_id, lm.player_id, lm.points, row_number()"
+14734,1073.206,0.0728,0.0336,1.408,14610,140684,6810,95.028,44168823,"INSERT INTO match_reports (match_id, reporter_id, opponent_id, winner_id) VALUES ($1, $2, $3, $4) ON CONFLICT (match_id, reporter_id) DO NOTHING"
+7305,412.469,0.0565,0.0301,1.387,7305,90151,14,0.094,7161186,"UPDATE league_members SET points = points + $3, last_win_at = now() WHERE week_id = $1 AND player_id = $2"
+7305,385.075,0.0527,0.0480,3.113,7305,53123,5674,49.343,34947736,"INSERT INTO match_results (match_id, week_id, winner_id, loser_id) VALUES ($1, $2, $3, $4) ON CONFLICT (match_id) DO NOTHING"
+14610,261.801,0.0179,0.0091,0.243,7305,65745,0,0.000,0,"SELECT opponent_id, winner_id FROM match_reports WHERE match_id = $1 AND reporter_id = $2"
+157,19.430,0.1238,0.0297,0.189,157,0,0,0.000,0,"SELECT to_char(clock_timestamp() AT TIME ZONE $1, $2), count(*) FILTER (WHERE state = $3), count(*) FILTER (WHERE state = $4 AND wait_event_type IS NULL), count"
+14734,18.760,0.0013,0.0032,0.384,0,0,0,0.000,0,BEGIN
+14734,13.775,0.0009,0.0006,0.024,0,0,0,0.000,0,COMMIT
+1,0.093,0.0933,0.0000,0.093,1,0,0,0.000,0,SELECT pg_stat_statements_reset()
+
+## pgss_endpoint
+endpoint,requests,statements,total_ms,mean_ms_per_request,max_single_statement_ms
+leaderboard,58336,58336,6203.274,0.1063,35.408
+report,14734,88156,15312.824,1.0393,42.696
+
+## sizes_after
+table_name,row_count,heap_bytes,index_bytes,total_bytes,heap_bytes_per_row,index_bytes_per_row,total_bytes_per_row
+league_members,60000,3727360,5652480,9420800,62.1,94.2,157.0
+match_results,1447427,145244160,111837184,257155072,100.3,77.3,177.7
+match_reports,2903854,288989184,257703936,546807808,99.5,88.7,188.3
+DATABASE,,,,821271575,,,
+
+## pgstat_after
+-[ RECORD 1 ]--+------------------------------
+at             | 2026-11-17 20:37:29.006544+00
+xact_commit    | 74315
+xact_rollback  | 0
+blks_read      | 122051
+blks_hit       | 2318021
+tup_inserted   | 22179
+tup_updated    | 7392
+deadlocks      | 0
+temp_bytes     | 0
+blk_read_time  | 361.094
+blk_write_time | 19.797
+
+-[ RECORD 1 ]---------+------------------------------
+checkpoints_timed     | 0
+checkpoints_req       | 1
+checkpoint_write_time | 152
+checkpoint_sync_time  | 412
+buffers_checkpoint    | 32566
+buffers_clean         | 948
+maxwritten_clean      | 8
+buffers_backend       | 140526
+buffers_backend_fsync | 0
+buffers_alloc         | 189120
+stats_reset           | 2026-11-17 20:32:28.324725+00
+
+-[ RECORD 1 ]----+------------------------------
+wal_records      | 112144
+wal_fpi          | 13661
+wal_bytes        | 90589094
+wal_buffers_full | 0
+wal_write        | 15226
+wal_sync         | 15112
+wal_write_time   | 438.806
+wal_sync_time    | 12217.724
+stats_reset      | 2026-11-17 20:32:28.324725+00
+
+## pg_log
+# postgres log lines (checkpoint/lock/error) since 2026-11-17T20:34:51Z
+# app error logs (pino level >= 50) since 2026-11-17T20:34:51Z

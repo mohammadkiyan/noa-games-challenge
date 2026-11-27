@@ -1,0 +1,84 @@
+## machine
+date_utc=2026-11-18T21:47:30.401Z git=none dirty_files=51
+profile=knee k6_env: TARGET_RPS= RAMP= HOLD= KNEE_START=400 KNEE_STEP=100 KNEE_MAX_STEPS= KNEE_WARMUP=60 STEP_SECONDS= LABEL=knee-pcore
+CPU(s):                                  12
+Model name:                              12th Gen Intel(R) Core(TM) i7-1255U
+Thread(s) per core:                      2
+Core(s) per socket:                      10
+CPU(s) scaling MHz:                      40%
+CPU max MHz:                             4700.0000
+CPU min MHz:                             400.0000
+mem_total_bytes=41724596224
+os=Ubuntu 24.04.5 LTS kernel=7.0.0-43-generic loadavg=2.77 4.27 3.56
+docker=29.9.2 k6_image=grafana/k6:1.0.0 k6_cpuset=4-11
+other_running_containers=noa-games-challenge-db-1 decor-shargh-postgres-1 decor-shargh-gotenberg-1 decor-shargh-mailpit-1 decor-shargh-minio-1 
+box: image=sha256:9bc86f2749f9913b26e4d14da4b1370038330b0fe5f1b7b4dfdbddd9d092240d nano_cpus=1000000000 memory=1073741824 memory_swap=1073741824 cpuset=2
+node=v22.23.5 app_pool_size=10 leaderboard_cache_ms=2000
+PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+effective_cache_size=65536 8kB
+fsync=on
+maintenance_work_mem=65536 kB
+max_connections=20
+max_wal_size=1024 MB
+random_page_cost=1.1
+shared_buffers=32768 8kB
+shared_preload_libraries=pg_stat_statements
+synchronous_commit=on
+track_io_timing=on
+wal_level=replica
+work_mem=4096 kB
+
+## sizes_before
+table_name,row_count,heap_bytes,index_bytes,total_bytes,heap_bytes_per_row,index_bytes_per_row,total_bytes_per_row
+league_members,60000,3776512,5668864,9486336,62.9,94.5,158.1
+match_results,1582746,159424512,122568704,282066944,100.7,77.4,178.2
+match_reports,3174493,316710912,281288704,598122496,99.8,88.6,188.4
+DATABASE,,,,897678359,,,
+
+## pgstat_before
+-[ RECORD 1 ]--+-----------------------------
+at             | 2026-11-18 21:47:31.84064+00
+xact_commit    | 891221
+xact_rollback  | 0
+blks_read      | 1124739
+blks_hit       | 23577147
+tup_inserted   | 1538324
+tup_updated    | 112774
+deadlocks      | 0
+temp_bytes     | 0
+blk_read_time  | 40948.494
+blk_write_time | 427.454
+
+-[ RECORD 1 ]---------+------------------------------
+checkpoints_timed     | 39
+checkpoints_req       | 4
+checkpoint_write_time | 1590993
+checkpoint_sync_time  | 149
+buffers_checkpoint    | 135056
+buffers_clean         | 32389
+maxwritten_clean      | 0
+buffers_backend       | 9758
+buffers_backend_fsync | 0
+buffers_alloc         | 138218
+stats_reset           | 2026-11-17 20:50:45.222838+00
+
+-[ RECORD 1 ]----+------------------------------
+wal_records      | 1712545
+wal_fpi          | 168149
+wal_bytes        | 1137997104
+wal_buffers_full | 0
+wal_write        | 227585
+wal_sync         | 226076
+wal_write_time   | 7101.309
+wal_sync_time    | 234579.254
+stats_reset      | 2026-11-17 20:50:45.222838+00
+
+
+## memevents_before
+low 0
+high 0
+max 13727
+oom 0
+oom_kill 0
+oom_group_kill 0
+sock_throttled 0

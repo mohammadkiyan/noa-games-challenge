@@ -1,0 +1,20 @@
+06-target  profile=target  k6_exit=0
+  reproduce: make box-up && make measure PROFILE=target   (dataset: make box-seed, see evidence/seed.txt)
+  run: date_utc=2026-11-18T09:27:31.154Z git=none dirty_files=50
+  host: Model name: 12th Gen Intel(R) Core(TM) i7-1255U | CPU(s): 12 | other_running_containers=noa-games-challenge-db-1 decor-shargh-postgres-1 decor-shargh-gotenberg-1 decor-shargh-mailpit-1 decor-shargh-minio-1
+  box: nano_cpus=1000000000 memory=1073741824 memory_swap=1073741824 cpuset= | node=v22.23.5 app_pool_size=10 | PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) | shared_buffers=32768 8kB max_connections=20 synchronous_commit=on
+  checks: leaderboard 200: 58302 ok / 0 fail | pair -> one 201 and one 202: 7305 ok / 0 fail | duplicate -> 200: 150 ok / 0 fail | dropped_iterations 33
+  steady 120s: target 540 rps, achieved 540.8 rps (64895 req)
+  latency ms: all p95 3.9 p99 36.1 max 463.7 | leaderboard p95 2.2 p99 21.2 | report p95 17.1 p99 90.2
+  errors: 0.000% (0 of 64895)
+  SLO p95<300 p99<800 err<0.1%: PASS
+  DB time/request, server (pg_stat_statements, whole run incl. ramp): leaderboard mean 0.1165 ms (58302 req, max stmt 38.221 ms) | report mean 2.3393 ms (14760 req, max stmt 456.765 ms)
+  DB time/request, app connect->release (ms): leaderboard mean 1.03 p95 1.40 p99 3.01 (n=49648) | report mean 4.37 p95 7.64 p99 68.00 (n=12542)
+  DB time/request, all requests (C9): mean 1.702 p95 2.748 p99 8.876 ms (n=62190) | Little's law: 540.8 req/s x 1.702 ms = 0.92 connections held
+  pool wait (ms): leaderboard p95 0.030 p99 4.142 max 379.7 | report p95 0.023 p99 5.617 max 368.3 | waiting_max 171
+  busy DB conns (pg_stat_activity active, 118 x 1 s): avg 0.75 max 10 | idle-in-tx avg 0.00 | samples with Lock 14, LWLock 0, IO 20
+  box CPU 78.4% of 1 vCPU, quota hit in 4.5% of 100-ms periods | split node 52.5% / postgres 47.5% | mem max 931 MiB (anon 77), memory.max hits not sampled
+  node event loop: utilization avg 0.35, delay p99 max 14.1 ms (23 windows)
+  C7 bytes/row before run (total incl. indexes): league_members 157.8 (60000 rows) | match_results 177.8 (1475389 rows) | match_reports 188.3 (2959779 rows) | DB 798 MiB
+  C7 growth during run (delta total_bytes / delta rows): match_results 180.5 (+7305 rows) | match_reports 189.0 (+14610 rows)
+  DB block reads (pg_stat_statements top 30): 12741 read from disk/page cache in 11685.7 ms = 0.917 ms/block | 1314133 shared_buffers hits

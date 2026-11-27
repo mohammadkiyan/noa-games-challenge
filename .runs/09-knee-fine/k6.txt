@@ -1,0 +1,515 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+     execution: local
+        script: /loadtest/scenario.js
+        output: -
+
+     scenarios: (100.00%) 2 scenarios, 6000 max VUs, 20m30s max duration (incl. graceful stop):
+              * reads: Up to 1020.00 iterations/s for 20m0s over 39 stages (maxVUs: 100-3000, exec: readLeaderboard, gracefulStop: 30s)
+              * reports: Up to 127.00 iterations/s for 20m0s over 39 stages (maxVUs: 100-3000, exec: reportPair, gracefulStop: 30s)
+
+time="2026-11-18T09:43:46Z" level=info msg="K6_T0_MS=1794995026351" source=console
+
+running (00m01.0s), 0145/0241 VUs, 474 complete and 0 interrupted iterations
+reads     [   0% ] 0090/0141 VUs  00m01.0s/20m0s  0640.00 iters/s
+reports   [   0% ] 0055/0100 VUs  00m01.0s/20m0s  080.00 iters/s
+
+running (00m02.0s), 0265/0314 VUs, 963 complete and 0 interrupted iterations
+reads     [   0% ] 0199/0214 VUs  00m02.0s/20m0s  0640.00 iters/s
+reports   [   0% ] 0066/0100 VUs  00m02.0s/20m0s  080.00 iters/s
+
+running (00m03.0s), 0282/0383 VUs, 1562 complete and 0 interrupted iterations
+reads     [   0% ] 0249/0283 VUs  00m03.0s/20m0s  0640.00 iters/s
+reports   [   0% ] 0033/0100 VUs  00m03.0s/20m0s  080.00 iters/s
+
+running (00m04.0s), 0249/0413 VUs, 2274 complete and 0 interrupted iterations
+reads     [   0% ] 0218/0313 VUs  00m04.0s/20m0s  0640.00 iters/s
+reports   [   0% ] 0031/0100 VUs  00m04.0s/20m0s  080.00 iters/s
+
+running (00m05.0s), 0257/0421 VUs, 2969 complete and 0 interrupted iterations
+reads     [   0% ] 0227/0321 VUs  00m05.0s/20m0s  0640.00 iters/s
+reports   [   0% ] 0030/0100 VUs  00m05.0s/20m0s  080.00 iters/s
+
+running (00m06.0s), 0217/0421 VUs, 3730 complete and 0 interrupted iterations
+reads     [   0% ] 0192/0321 VUs  00m06.0s/20m0s  0640.00 iters/s
+reports   [   0% ] 0025/0100 VUs  00m06.0s/20m0s  080.00 iters/s
+
+running (00m07.0s), 0001/0421 VUs, 4666 complete and 0 interrupted iterations
+reads     [   1% ] 0001/0321 VUs  00m07.0s/20m0s  0640.00 iters/s
+reports   [   1% ] 0000/0100 VUs  00m07.0s/20m0s  080.00 iters/s
+
+running (00m08.0s), 0000/0421 VUs, 5386 complete and 0 interrupted iterations
+reads     [   1% ] 0000/0321 VUs  00m08.0s/20m0s  0640.00 iters/s
+reports   [   1% ] 0000/0100 VUs  00m08.0s/20m0s  080.00 iters/s
+
+running (00m09.0s), 0002/0421 VUs, 6105 complete and 0 interrupted iterations
+reads     [   1% ] 0002/0321 VUs  00m09.0s/20m0s  0640.00 iters/s
+reports   [   1% ] 0000/0100 VUs  00m09.0s/20m0s  080.00 iters/s
+
+running (00m10.0s), 0002/0421 VUs, 6825 complete and 0 interrupted iterations
+reads     [   1% ] 0002/0321 VUs  00m10.0s/20m0s  0640.00 iters/s
+reports   [   1% ] 0000/0100 VUs  00m10.0s/20m0s  080.00 iters/s
+
+running (00m11.0s), 0000/0421 VUs, 7546 complete and 0 interrupted iterations
+reads     [   1% ] 0000/0321 VUs  00m11.0s/20m0s  0640.00 iters/s
+reports   [   1% ] 0000/0100 VUs  00m11.0s/20m0s  080.00 iters/s
+
+running (00m12.0s), 0001/0421 VUs, 8266 complete and 0 interrupted iterations
+reads     [   1% ] 0001/0321 VUs  00m12.0s/20m0s  0640.00 iters/s
+reports   [   1% ] 0000/0100 VUs  00m12.0s/20m0s  080.00 iters/s
+
+
+  █ THRESHOLDS 
+
+    dropped_iterations
+    ✓ 'count>=0' count=340
+
+    http_req_duration{step:1,endpoint:leaderboard}
+    ✓ 'max>=0' max=1.32s
+
+    http_req_duration{step:1,endpoint:report}
+    ✓ 'max>=0' max=1.32s
+
+    http_req_duration{step:1}
+    ✗ 'p(95)<300' p(95)=500.63ms
+
+    http_req_duration{step:10,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:10,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:10}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:11,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:11,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:11}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:12,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:12,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:12}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:13,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:13,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:13}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:14,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:14,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:14}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:15,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:15,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:15}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:16,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:16,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:16}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:17,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:17,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:17}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:18,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:18,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:18}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:19,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:19,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:19}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:2,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:2,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:2}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:20,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:20,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:20}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:3,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:3,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:3}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:4,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:4,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:4}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:5,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:5,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:5}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:6,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:6,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:6}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:7,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:7,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:7}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:8,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:8,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:8}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_duration{step:9,endpoint:leaderboard}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:9,endpoint:report}
+    ✓ 'max>=0' max=0s
+
+    http_req_duration{step:9}
+    ✓ 'p(95)<300' p(95)=0s
+
+    http_req_failed{step:1}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:10}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:11}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:12}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:13}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:14}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:15}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:16}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:17}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:18}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:19}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:2}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:20}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:3}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:4}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:5}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:6}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:7}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:8}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_req_failed{step:9}
+    ✓ 'rate<0.01' rate=0.00%
+
+    http_reqs{endpoint:leaderboard}
+    ✓ 'count>=0' count=7311
+
+    http_reqs{endpoint:report}
+    ✓ 'count>=0' count=1934
+
+    http_reqs{step:1}
+    ✓ 'count>=0' count=9245
+
+    http_reqs{step:10}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:11}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:12}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:13}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:14}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:15}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:16}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:17}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:18}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:19}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:2}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:20}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:3}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:4}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:5}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:6}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:7}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:8}
+    ✓ 'count>=0' count=0
+
+    http_reqs{step:9}
+    ✓ 'count>=0' count=0
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......................: 8289    693.074545/s
+    checks_succeeded...................: 100.00% 8289 out of 8289
+    checks_failed......................: 0.00%   0 out of 8289
+
+    ✓ leaderboard 200
+    ✓ pair -> one 201 and one 202
+    ✓ duplicate -> 200
+
+    HTTP
+    http_req_duration...................................................................: avg=200.64ms med=103.27ms p(95)=500.63ms p(99)=1.15s   max=1.32s
+      { expected_response:true }........................................................: avg=200.64ms med=103.27ms p(95)=500.63ms p(99)=1.15s   max=1.32s
+      { step:1,endpoint:leaderboard }...................................................: avg=184.1ms  med=88.91ms  p(95)=486.8ms  p(99)=874.6ms max=1.32s
+      { step:1,endpoint:report }........................................................: avg=263.15ms med=191.39ms p(95)=1.07s    p(99)=1.26s   max=1.32s
+      { step:1 }........................................................................: avg=200.64ms med=103.27ms p(95)=500.63ms p(99)=1.15s   max=1.32s
+      { step:10,endpoint:leaderboard }..................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:10,endpoint:report }.......................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:10 }.......................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:11,endpoint:leaderboard }..................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:11,endpoint:report }.......................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:11 }.......................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:12,endpoint:leaderboard }..................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:12,endpoint:report }.......................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:12 }.......................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:13,endpoint:leaderboard }..................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:13,endpoint:report }.......................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:13 }.......................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:14,endpoint:leaderboard }..................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:14,endpoint:report }.......................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:14 }.......................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:15,endpoint:leaderboard }..................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:15,endpoint:report }.......................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:15 }.......................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:16,endpoint:leaderboard }..................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:16,endpoint:report }.......................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:16 }.......................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:17,endpoint:leaderboard }..................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:17,endpoint:report }.......................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:17 }.......................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:18,endpoint:leaderboard }..................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:18,endpoint:report }.......................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:18 }.......................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:19,endpoint:leaderboard }..................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:19,endpoint:report }.......................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:19 }.......................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:2,endpoint:leaderboard }...................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:2,endpoint:report }........................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:2 }........................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:20,endpoint:leaderboard }..................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:20,endpoint:report }.......................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:20 }.......................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:3,endpoint:leaderboard }...................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:3,endpoint:report }........................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:3 }........................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:4,endpoint:leaderboard }...................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:4,endpoint:report }........................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:4 }........................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:5,endpoint:leaderboard }...................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:5,endpoint:report }........................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:5 }........................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:6,endpoint:leaderboard }...................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:6,endpoint:report }........................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:6 }........................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:7,endpoint:leaderboard }...................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:7,endpoint:report }........................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:7 }........................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:8,endpoint:leaderboard }...................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:8,endpoint:report }........................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:8 }........................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:9,endpoint:leaderboard }...................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:9,endpoint:report }........................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+      { step:9 }........................................................................: avg=0s       med=0s       p(95)=0s       p(99)=0s      max=0s   
+    http_req_failed.....................................................................: 0.00%  0 out of 9245
+      { step:1 }........................................................................: 0.00%  0 out of 9245
+      { step:10 }.......................................................................: 0.00%  0 out of 0
+      { step:11 }.......................................................................: 0.00%  0 out of 0
+      { step:12 }.......................................................................: 0.00%  0 out of 0
+      { step:13 }.......................................................................: 0.00%  0 out of 0
+      { step:14 }.......................................................................: 0.00%  0 out of 0
+      { step:15 }.......................................................................: 0.00%  0 out of 0
+      { step:16 }.......................................................................: 0.00%  0 out of 0
+      { step:17 }.......................................................................: 0.00%  0 out of 0
+      { step:18 }.......................................................................: 0.00%  0 out of 0
+      { step:19 }.......................................................................: 0.00%  0 out of 0
+      { step:2 }........................................................................: 0.00%  0 out of 0
+      { step:20 }.......................................................................: 0.00%  0 out of 0
+      { step:3 }........................................................................: 0.00%  0 out of 0
+      { step:4 }........................................................................: 0.00%  0 out of 0
+      { step:5 }........................................................................: 0.00%  0 out of 0
+      { step:6 }........................................................................: 0.00%  0 out of 0
+      { step:7 }........................................................................: 0.00%  0 out of 0
+      { step:8 }........................................................................: 0.00%  0 out of 0
+      { step:9 }........................................................................: 0.00%  0 out of 0
+    http_reqs...........................................................................: 9245   773.00931/s
+      { endpoint:leaderboard }..........................................................: 7311   611.300277/s
+      { endpoint:report }...............................................................: 1934   161.709032/s
+      { step:1 }........................................................................: 9245   773.00931/s
+      { step:10 }.......................................................................: 0      0/s
+      { step:11 }.......................................................................: 0      0/s
+      { step:12 }.......................................................................: 0      0/s
+      { step:13 }.......................................................................: 0      0/s
+      { step:14 }.......................................................................: 0      0/s
+      { step:15 }.......................................................................: 0      0/s
+      { step:16 }.......................................................................: 0      0/s
+      { step:17 }.......................................................................: 0      0/s
+      { step:18 }.......................................................................: 0      0/s
+      { step:19 }.......................................................................: 0      0/s
+      { step:2 }........................................................................: 0      0/s
+      { step:20 }.......................................................................: 0      0/s
+      { step:3 }........................................................................: 0      0/s
+      { step:4 }........................................................................: 0      0/s
+      { step:5 }........................................................................: 0      0/s
+      { step:6 }........................................................................: 0      0/s
+      { step:7 }........................................................................: 0      0/s
+      { step:8 }........................................................................: 0      0/s
+      { step:9 }........................................................................: 0      0/s
+
+    EXECUTION
+    dropped_iterations..................................................................: 340    28.428682/s
+    iteration_duration..................................................................: avg=194.42ms med=96.78ms  p(95)=495.46ms p(99)=1.11s   max=1.32s
+    iterations..........................................................................: 8267   691.235042/s
+    vus.................................................................................: 1      min=0         max=281
+    vus_max.............................................................................: 421    min=241       max=421
+
+    NETWORK
+    data_received.......................................................................: 18 MB  1.5 MB/s
+    data_sent...........................................................................: 1.3 MB 107 kB/s
+
+
+
+
+running (00m12.0s), 0000/0421 VUs, 8267 complete and 2 interrupted iterations
+reads   ✗ [   1% ] 0001/0321 VUs  00m12.0s/20m0s  0640.00 iters/s
+reports ✗ [   1% ] 0000/0100 VUs  00m12.0s/20m0s  080.00 iters/s
+time="2026-11-18T09:43:59Z" level=error msg="thresholds on metrics 'http_req_duration{step:1}' were crossed; at least one has abortOnFail enabled, stopping test prematurely"
+k6_exit=99

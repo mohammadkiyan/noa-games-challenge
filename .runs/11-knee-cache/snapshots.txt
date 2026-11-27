@@ -1,0 +1,157 @@
+## machine
+date_utc=2026-11-18T21:32:46.662Z git=none dirty_files=51
+profile=knee k6_env: TARGET_RPS= RAMP= HOLD= KNEE_START=400 KNEE_STEP=100 KNEE_MAX_STEPS= KNEE_WARMUP=60 STEP_SECONDS= LABEL=knee-cache
+CPU(s):                                  12
+Model name:                              12th Gen Intel(R) Core(TM) i7-1255U
+Thread(s) per core:                      2
+Core(s) per socket:                      10
+CPU(s) scaling MHz:                      40%
+CPU max MHz:                             4700.0000
+CPU min MHz:                             400.0000
+mem_total_bytes=41724596224
+os=Ubuntu 24.04.5 LTS kernel=7.0.0-43-generic loadavg=5.25 3.48 2.34
+docker=29.9.2 k6_image=grafana/k6:1.0.0 k6_cpuset=
+other_running_containers=noa-games-challenge-db-1 decor-shargh-postgres-1 decor-shargh-gotenberg-1 decor-shargh-mailpit-1 decor-shargh-minio-1 
+box: image=sha256:9bc86f2749f9913b26e4d14da4b1370038330b0fe5f1b7b4dfdbddd9d092240d nano_cpus=1000000000 memory=1073741824 memory_swap=1073741824 cpuset=
+node=v22.23.5 app_pool_size=10 leaderboard_cache_ms=2000
+PostgreSQL 16.15 (Debian 16.15-1.pgdg13+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+effective_cache_size=65536 8kB
+fsync=on
+maintenance_work_mem=65536 kB
+max_connections=20
+max_wal_size=1024 MB
+random_page_cost=1.1
+shared_buffers=32768 8kB
+shared_preload_libraries=pg_stat_statements
+synchronous_commit=on
+track_io_timing=on
+wal_level=replica
+work_mem=4096 kB
+
+## sizes_before
+table_name,row_count,heap_bytes,index_bytes,total_bytes,heap_bytes_per_row,index_bytes_per_row,total_bytes_per_row
+league_members,60000,3776512,5652480,9469952,62.9,94.2,157.8
+match_results,1523358,153198592,118054912,271327232,100.6,77.5,178.1
+match_reports,3055717,304553984,270843904,575520768,99.7,88.6,188.3
+DATABASE,,,,864320535,,,
+
+## pgstat_before
+-[ RECORD 1 ]--+------------------------------
+at             | 2026-11-18 21:32:48.640015+00
+xact_commit    | 534423
+xact_rollback  | 0
+blks_read      | 842924
+blks_hit       | 16871430
+tup_inserted   | 1360160
+tup_updated    | 53344
+deadlocks      | 0
+temp_bytes     | 0
+blk_read_time  | 26805.792
+blk_write_time | 266.834
+
+-[ RECORD 1 ]---------+------------------------------
+checkpoints_timed     | 36
+checkpoints_req       | 4
+checkpoint_write_time | 1052003
+checkpoint_sync_time  | 93
+buffers_checkpoint    | 99414
+buffers_clean         | 10616
+maxwritten_clean      | 0
+buffers_backend       | 4707
+buffers_backend_fsync | 0
+buffers_alloc         | 79369
+stats_reset           | 2026-11-17 20:50:45.222838+00
+
+-[ RECORD 1 ]----+------------------------------
+wal_records      | 810491
+wal_fpi          | 87989
+wal_bytes        | 590406826
+wal_buffers_full | 0
+wal_write        | 107920
+wal_sync         | 107118
+wal_write_time   | 3505.772
+wal_sync_time    | 116184.85
+stats_reset      | 2026-11-17 20:50:45.222838+00
+
+
+## memevents_before
+low 0
+high 0
+max 0
+oom 0
+oom_kill 0
+oom_group_kill 0
+sock_throttled 0
+
+## pgss
+calls,total_ms,mean_ms,stddev_ms,max_ms,rows,shared_blks_hit,shared_blks_read,blk_read_ms,wal_bytes,query
+105258,103862.828,0.9867,3.2505,204.527,105258,2557913,48569,11918.599,478288767,"SELECT report_match($1, $2, $3, $4, $5, $6) AS status"
+199305,19055.347,0.0956,0.3901,57.123,9965250,3073499,0,0.000,3145973,"SELECT lm.league_id, lm.player_id, lm.points, row_number() OVER (ORDER BY lm.points DESC, lm.last_win_at ASC NULLS LAST, lm.player_id)::int AS rank FROM league_"
+1200,246.440,0.2054,0.1661,2.797,60000,21873,588,78.803,9405,"WITH me AS ( SELECT league_id FROM league_members WHERE week_id = $1 AND player_id = $2 ) SELECT lm.league_id, lm.player_id, lm.points, row_number() OVER (ORDER"
+656,127.444,0.1943,0.7744,19.677,656,0,0,0.000,0,"SELECT count(*) FILTER (WHERE state = $1), count(*) FILTER (WHERE state = $2 AND wait_event_type IS NULL), count(*) FILTER (WHERE state = $3 AND wait_event_type"
+1,0.087,0.0868,0.0000,0.087,1,0,0,0.000,0,SELECT pg_stat_statements_reset()
+
+## pgss_endpoint
+endpoint,calls,total_ms,mean_ms_per_call,max_single_statement_ms
+leaderboard,200505,19301.787,0.0963,57.123
+report,105258,103862.828,0.9867,204.527
+
+## sizes_after
+table_name,row_count,heap_bytes,index_bytes,total_bytes,heap_bytes_per_row,index_bytes_per_row,total_bytes_per_row
+league_members,60000,3776512,5668864,9486336,62.9,94.5,158.1
+match_results,1575442,158605312,122118144,280797184,100.7,77.5,178.2
+match_reports,3159885,315170816,279863296,595156992,99.7,88.6,188.3
+DATABASE,,,,893443095,,,
+
+## pgstat_after
+-[ RECORD 1 ]--+------------------------------
+at             | 2026-11-18 21:44:04.335678+00
+xact_commit    | 840628
+xact_rollback  | 0
+blks_read      | 948977
+blks_hit       | 22593987
+tup_inserted   | 1516214
+tup_updated    | 105398
+deadlocks      | 0
+temp_bytes     | 0
+blk_read_time  | 39323.139
+blk_write_time | 406.273
+
+-[ RECORD 1 ]---------+------------------------------
+checkpoints_timed     | 38
+checkpoints_req       | 4
+checkpoint_write_time | 1321048
+checkpoint_sync_time  | 137
+buffers_checkpoint    | 124661
+buffers_clean         | 28913
+maxwritten_clean      | 0
+buffers_backend       | 9241
+buffers_backend_fsync | 0
+buffers_alloc         | 132244
+stats_reset           | 2026-11-17 20:50:45.222838+00
+
+-[ RECORD 1 ]----+------------------------------
+wal_records      | 1601674
+wal_fpi          | 159963
+wal_bytes        | 1080285331
+wal_buffers_full | 0
+wal_write        | 212560
+wal_sync         | 211095
+wal_write_time   | 6698.393
+wal_sync_time    | 222004.504
+stats_reset      | 2026-11-17 20:50:45.222838+00
+
+
+## memevents_after
+low 0
+high 0
+max 10834
+oom 0
+oom_kill 0
+oom_group_kill 0
+sock_throttled 0
+
+## pg_log
+2026-11-18 21:36:58.967 UTC [30] LOG:  checkpoint starting: time
+2026-11-18 21:41:28.105 UTC [30] LOG:  checkpoint complete: wrote 16651 buffers (50.8%); 0 WAL file(s) added, 4 removed, 3 recycled; write=269.045 s, sync=0.044 s, total=269.139 s; sync files=49, longest=0.005 s, average=0.001 s; distance=117290 kB, estimate=117290 kB; lsn=0/A8493480, redo lsn=0/9BF97810
+2026-11-18 21:41:58.135 UTC [30] LOG:  checkpoint starting: time
