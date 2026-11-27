@@ -44,13 +44,11 @@
 | Admin | `POST /admin/payouts/pause` | Kill switch |
 
 ## 4. Decisions
-**ADR-1: Polling, not WebSockets.** WebSockets bring reconnect storms, sticky sessions and pub/sub fan-out; polling avoids them and caches. Cost: seconds of lag, hidden by optimistic UI.
+**ADR-1: Polling, not WebSockets.** WebSockets bring reconnect storms, sticky sessions and pub/sub fan-out; polling avoids them. Cost: seconds of lag, hidden by optimistic UI.
 
-**ADR-2: Postgres only, not Postgres + Redis.** A league leaderboard is 50 rows behind one index; one store means one backup, one truth. Redis only if Postgres proves the bottleneck.
+**ADR-2: Postgres only, not Redis or Kafka.** A leaderboard is 50 rows behind one index; one store means one backup, one truth. Payout safety comes from writing the ledger row before the wallet call (outbox) and the wallet dropping duplicate keys (A9 unconfirmed), not a broker for one weekly call. Redis only if Postgres proves the bottleneck.
 
 **ADR-3: Two agreeing reports, not trusting the host.** The host can lie unchallenged; the guest's copy catches a host lying only to the server. Cost: a match counts only when both reports arrive. A per-match advisory lock stops simultaneous reports missing each other.
-
-**ADR-4: Postgres ledger as the outbox, not Kafka.** Safety comes from writing the payout row before calling the wallet (outbox) and the wallet dropping duplicate keys (inbox, A9 unconfirmed), not the transport. Kafka adds a broker for one weekly call.
 
 ## 5. Handling load
 Target: 2,150 rps launch first hour; 5,375 survived by shedding (CAPACITY.md §7) [CHG-02].
@@ -59,8 +57,8 @@ Target: 2,150 rps launch first hour; 5,375 survived by shedding (CAPACITY.md §7
 - **Rate limits:** per player, 25 reports/hour (3-minute matches allow ≤ 20) and 1 leaderboard read/2 s, counted in memory: Caddy pins each token to one process. Per IP: flood ceiling only (carrier NAT) [CHG-04].
 - **Shedding:** CHG-04 ladder; reports last [CHG-04].
 - **Idempotent reports:** primary key `(match_id, reporter_id)`, so a retry returns `duplicate`. After failover, store-build clients resend kept week reports on a new `/leagues/status` epoch [CHG-03].
-- **Idempotent coins, crash-safe** (see ADR-4):
-  1. **Week close, per league** [CHG-06]: a match counts in its first report's week if confirmed before close (DB clock; slice: app clock, README); close starts after a grace above `statement_timeout`. Reports for closed weeks or older matches get 409: post-deletion resends never recount. One transaction per league: rank, insert `reward_ledger` rows `ON CONFLICT DO NOTHING`, set tiers once (`player_tiers.set_by_week`), mark closed. A restart resumes unclosed leagues (`weeks.status`); the week is `closed`, and new-week joins open, only when none remain.
+- **Idempotent coins, crash-safe** (see ADR-2):
+  1. **Week close, per league** [CHG-06]: a match counts in its first report's week (DB clock; slice: app clock). Reports carry the week seen at play; a closed week gets 409, so resends never recount. Barrier: reports hold the week's advisory lock shared and check `weeks.status`; close takes it exclusively, sets `closing`, commits. One transaction per league: rank, insert `reward_ledger` rows `ON CONFLICT DO NOTHING`, set tiers once (`player_tiers.set_by_week`), mark closed. A restart resumes unclosed leagues (`weeks.status`). A player joins the new week once their old league closes; earlier new-week wins are credited from `match_results`.
   2. **Payout guard:** total ≤ leagues × promoted × coins (structural) and an absolute weekly cap (owner sets it); 2×-last-week hold after 4 weeks; kill switch; manual approval of a `closed` week [CHG-06].
   3. **Payout worker:** claims rows (`FOR UPDATE SKIP LOCKED`, lease) and moves each `pending → sending → paid`. Each wallet call sends `Idempotency-Key = sha256(week:player:kind)`, stable across reruns and failover.
   4. **Janitor on startup:** an expired `sending` row is retried with the same key if the wallet drops duplicates (A9), else marked `uncertain`. Late beats twice.
@@ -76,6 +74,6 @@ Target: 2,150 rps launch first hour; 5,375 survived by shedding (CAPACITY.md §7
 | Week-close / payout job | Late rewards | Resumable (§5) | Restart; check `uncertain` rows |
 
 ## 7. Security
-- **Who can do what:** the player ID comes only from the verified token, never the body. Players report only their own matches and read only their own league. Without this, one cheater could send both "agreeing" reports. Admin: separate token, IP allowlist.
+- **Who can do what:** the player ID comes only from the verified token, never the body. Players report only their own matches and read only their own league. Else one cheater could send both "agreeing" reports. Admin: separate token, IP allowlist.
 - **Client results:** never trusted alone: dual report, rate limits, pair-repeat flags, delayed payout.
 - **Secrets:** server env vars only (`.env.example` in the repo); the wallet key never reaches phones.

@@ -46,7 +46,7 @@ curl localhost:3000/leagues/me/leaderboard -H 'X-Player-Id: p1'
 ## Known limits
 
 - Auth is fake: the `X-Player-Id` header is trusted as-is.
-- Disputed matches stay disputed (no resolution flow), and a winner with no league row in the match's week gets the result recorded but no points.
-- One Postgres instance, no replica or backups. Each app process has an in-memory leaderboard cache (2 s TTL, dropped when a win is recorded in that process; `LEADERBOARD_CACHE_MS=0` turns it off). With more than one process, other processes stay up to 2 s stale.
+- Disputed matches stay disputed (no resolution flow), and a winner with no league row in the match's week gets the result recorded but no points. A match ID reused by a different pair returns 201 `recorded` but adds no points (the first result stands); a changed resend by the same player returns 200 `duplicate` and the first report stands.
+- One Postgres instance, no replica or backups. Each app process has an in-memory leaderboard cache (2 s TTL, dropped when a win is recorded in that process; `LEADERBOARD_CACHE_MS=0` turns it off). With more than one process, other processes stay up to 2 s stale. Expired boards stay in memory until the week changes, so cache memory grows with the leagues read (unmeasured).
 - A match counts in the week of its **first** report (migration 003 stores each report's week; older rows use their `created_at` UTC ISO week). The week is the app server's UTC ISO week when that report is processed, not when the match was played. A report on Sunday 23:59:59 confirmed on Monday 00:00:01 adds the point to the old week (test 6). There is no week close yet, so a late confirmation still counts in an old week; production rejects reports for closed weeks (DESIGN.md §5).
 - Not in the slice: JWT verification, joining leagues (the seed creates them), week close, payouts, rate limits, shedding, the 14-day report deletion. Reports are deduplicated only while their row exists.

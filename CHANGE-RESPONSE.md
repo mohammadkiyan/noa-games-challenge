@@ -15,12 +15,12 @@ Core loop, dual report, idempotent atomic writes, Postgres, polling, coins only 
 - **[CHG-05] Clubs: not in MVP.** Needs membership, group scoring, reward split, UI, abuse rules: est. 20+ days. Lost: the banner's social promise. Next: league invites after two stable weeks.
 - **Moved before launch:** store-build levers, backoff/jitter, report resend; replica, outside dump, timed restore, failover; pre-created leagues; week close rehearsed at 84k leagues.
 - **Dropped:** one-report auto rule; anomaly hold before 4 weeks of history (cap instead).
-- **Gates** (real box): 2,150 rps × 30 min at p95 < 300 ms, p99 < 800, k6 errors incl. 429 and timeouts < 0.1%, CPU ≤ 70%; 5,375 rps from cold cache, reports in SLO, reads may shed; onboarding mix (JWT, join, first report, cold board) at plan rate; points = results after each run. Failed gate: same date, Leagues at the ladder step that passed, else off.
+- **Gates** (real box): 2,150 rps × 30 min at p95 < 300 ms, p99 < 800, k6 errors incl. 429 and timeouts < 0.1%, CPU ≤ 70%; 5,375 rps from cold cache, reports in SLO, reads may shed; onboarding mix (JWT, join, first report, cold board) at plan rate; points = results after each run. Failed gate: same date, Leagues at the last passing step, else off.
 
 ## New risks (→ mitigation; left over)
 - Real capacity unknown (laptop, one run, no TLS/JWT) → gates, ladder; traffic shape.
 - Retry storm at go-live → levers, backoff, jitter in the store build; old clients get only 429s.
-- Primary dies → OPS B: fence, payouts off, clients resend; unreplicated writes lost.
+- Primary dies → OPS B: fence (else down), payouts off, clients resend; unreplicated writes lost.
 - Your login at 10×, local JWT unconfirmed → ask, cache checks; its outage.
 - **[CHG-06]** New-account farming, fake match IDs → weekly payout cap (with you), approval, ≥ 5 wins to promote; polluted week-1 boards.
 - Week close, up to 84k leagues → resumable per-league close, rehearsed; late coins and joins.

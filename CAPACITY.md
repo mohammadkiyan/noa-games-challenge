@@ -36,8 +36,8 @@ Unpriced: outside dump + Grafana Cloud (allowance 25/month); AI subscription (pr
 ## 7. Launch week (600k DAU, est.) [CHG-02]
 - 600k × 43 = **25.8M/day**. First-hour share **30% (plan)** / 75% (stress) → **2,150** / 5,375 rps; knee ÷ 0.7: **3,070** / 7,680.
 - **Basis: cache-off knee 800 rps, CPU 93.3%** (`08-knee.txt`, 1 run): ≥ 12k leagues over ~8 caches leave few hits.
-- CPU: 0.933 ÷ 800 ≈ 1.17 cores/1k rps; ÷ 0.7: 3.6 plan, 9.0 stress; at 0.5–1 laptop core per vCPU, linear (unproven): **4–8 vCPU plan, 9–18 stress** → CCX43 (16).
+- CPU: 0.933 ÷ 800 ≈ 1.17 cores/1k rps; ÷ 0.7: 3.6 plan, 9.0 stress; assumed 0.5–1 laptop core per vCPU, linear (unproven): **4–8 vCPU plan, 9–18 stress** → CCX43 (16).
 - Busy connections: 2,150 × 1.484 ms = 3.2; 5,375 → 8.0 (pools 32).
 - Storage: 4.8M × 188 B + 2.4M × 178 B = **1.33 GB/day**; 14 days 18.6 GB. Set `max_slot_wal_keep_size`; 160 GB disk.
 - **Onboarding unmeasured** (≤ 600k new: JWT, joins, league creation, cold reads); margin 16 vs 4–8 vCPU until gated.
-- **Weekly members** (0.6M same daily; 1.2M 2× turnover, illustrative; 4.2M disjoint) → 12k+ / 24k / 84k leagues: joins, week close, cache spread, exposure (cap binds). DAU: rps, storage. Rehearse 4.2M (0.66 GB at 157.8 B, `08`).
+- **Weekly members** (0.6M same daily; 1.2M 2× turnover, illustrative; 4.2M disjoint) → 12k+ / 24k / 84k leagues: joins, week close, cache size, exposure (cap binds). DAU: rps, storage. Rehearse 4.2M (0.66 GB at 157.8 B, `08`).
