@@ -12,8 +12,9 @@ Version check → play a match → winner sees +1 instantly, confirmed in second
 | **Must** | Global weekly reset: points → 0, tier stays; unfinished matches don't count |
 | **Must** | 5 named tiers, promotion/demotion zones; coins only on promotion, paid once, payout guard |
 | **Must** | Anti-cheat: dual report, rate limits, delayed payout |
-| **Should** | Manual first payouts; anomaly alert |
-| **Could** | One-report matches: phone retry queue → auto rule → human review |
+| **Must** | Launch build: server-set polls, Retry-After, jittered backoff, retry queue, kill switch [CHG-04] |
+| **Should** | Manual payout approval; absolute weekly coin cap [CHG-06] |
+| **Could** | One-report matches: human review [CHG-04] |
 | **Won't** | All of §6, skill matchmaking, a match server |
 
 ## 3. Non-goals
@@ -22,22 +23,22 @@ Gameplay changes, coin budget system, perfect anti-cheat.
 ## 4. Assumptions
 | # | Assumption | From |
 |---|---|---|
-| A1 | One phone hosts; results stay on phones (app update needed) | Q1 |
-| A2 | No coin limit; Leagues caps its payout | Q2 |
-| A3 | Cheapest Hetzner (CPX02) as floor; load test decides | Q3 |
-| A4 | Push = up to 5× peak, mostly new players | Q4 |
-| A5 | Players cheat; late rewards OK | Q5 |
+| A1 | Both phones know the result; only phones store it [CHG-01] | Q1 |
+| A2 | No limit given; Leagues sets an absolute weekly cap [CHG-01] | Q2 |
+| A3 | <$500/month normal, $2,000 launch week; dedicated vCPU [CHG-01] | Q3, CR |
+| A4 | Launch: 10× DAU (600k), worst in hour 1; later pushes 5× peak (seen: 3×/2 days) [CHG-01] | Q4, CR |
+| A5 | Players cheat; coins after week close + approval [CHG-01] | Q5 |
 | A6 | Configurable reset time | Decision |
 | A7 | Inactive players keep their tier | Decision |
 | A8 | Leagues fill first-come-first-served | Decision |
 | A9 | Wallet ignores repeated payment keys; else manual review | Research |
 | A10 | Login issues a signed JWT; Leagues verifies it locally | Q6 |
 
-## 5. Open questions (Q1–5 sent 2026-11-17, 19:17 UK; pending)
-**Q1** Where do results go today? · **Q2** Reward coin limit? · **Q3** OK monthly server spend? · **Q4** Last push: what happened? · **Q5** Cheating so far; reward delay OK? · **Q6** (unsent: 5-question limit) Can we verify login tokens ourselves?
+## 5. Questions
+Q1–5 answered 2026-11-23, mostly "your call"; CR = change request (CHANGE-RESPONSE.md). Send **Q6** (verify login tokens ourselves?) now. [CHG-01]
 
 ## 6. Cuts and what each costs
-Working days, with / without AI (≈ 2×). † = platform project, not a feature.
+Days, with / without AI. † = platform project.
 
 | Cut | Product cost | With AI | Without |
 |---|---|---|---|
@@ -47,3 +48,4 @@ Working days, with / without AI (≈ 2×). † = platform project, not a feature
 | WebSockets † | Few-second lag | 15 | 30 |
 | Local-midnight reset † | Some regions reset in daytime | 20 | 40 |
 | Instant rewards † | Coins arrive hours late | 20+ | 40+ |
+| Club-vs-club [CHG-05] | Banner's social promise | 20+ | 40+ |

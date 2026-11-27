@@ -57,3 +57,11 @@ Got:      Checked each claim against `evidence/` first. The throttling check the
 Accepted: all doc fixes; 2,250 upper bound without the --cpus=2 run.
 Rejected: new load runs (time). Reviewer's "a few EUR per push": (19.49 - 5.99) / 730 h x 24 h = EUR 0.44/push day.
           Storage Box price (3.20 vs claimed 3.81) not verified either way: doc says "re-check".
+
+## 5. Commit the raw load-test output (2026-11-27, Claude Code / Claude Opus 5.5)
+Prompt:   "Keep the raw output in the repository."
+Got:      `.runs/` was git-ignored, so `evidence/*.txt` cited files (e.g. `.runs/03-knee/snapshots.txt`) a reviewer could
+          not open. Removed the ignore and committed `.runs/` (78 files, 18 MB, largest 4.6 MB: no LFS needed).
+          Grepped it for password/secret/token/postgres:// first: only V8 function names in the cpuprofile.
+Accepted:
+Rejected:
