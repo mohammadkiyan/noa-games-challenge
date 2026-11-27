@@ -81,12 +81,11 @@ demo:
 
 ## Quick status-checked smoke against the running Compose app (not historical instrumentation).
 benchmark-smoke:
-	@id=$(docker compose ps -q app); \
-	  test -n "$id" || { echo "Start the demo app with make up first" >&2; exit 1; }; \
-	  docker run --rm --network "container:$id" \
-	    --mount "type=bind,source=$(CURDIR)/slice/loadtest,target=/loadtest,readonly" \
-	    -e PROFILE=smoke -e BASE_URL=http://127.0.0.1:3000 -e PLAYERS=$(SMALL_PLAYERS) \
-	    $(K6_IMAGE) run /loadtest/reviewer-smoke.js
+	@test -n "$(shell docker compose ps -q app)" || { echo "Start the demo app with make up first" >&2; exit 1; }
+	docker run --rm --network "container:$(shell docker compose ps -q app)" \
+	  --mount "type=bind,source=$(CURDIR)/slice/loadtest,target=/loadtest,readonly" \
+	  -e PROFILE=smoke -e BASE_URL=http://127.0.0.1:3000 -e PLAYERS=$(SMALL_PLAYERS) \
+	  $(K6_IMAGE) run /loadtest/reviewer-smoke.js
 
 ## Seed the load-test dataset (replaces the current week's league rows).
 seed-big:
