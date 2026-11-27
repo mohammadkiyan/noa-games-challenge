@@ -1,4 +1,5 @@
-import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { currentWeekId } from '../src/db.ts';
 import { addMember, countRows, pointsOf, resetDb, setupApp } from './helpers.ts';
 
 const { pool, app } = setupApp();
@@ -18,6 +19,10 @@ function report(reporter: string, matchId: string, opponentId: string, winnerId:
     payload: { opponentId, winnerId },
   });
 }
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 beforeEach(async () => {
   await resetDb(pool);
@@ -112,5 +117,62 @@ describe('POST /matches/:matchId/report', () => {
       expect([ra.statusCode, rb.statusCode]).toEqual([201, 201]);
     }
     expect(await pointsOf(pool, 'p1')).toBe(2 * ROUNDS);
+  });
+
+  describe('week boundary: a match counts in the week of its first report', () => {
+    // ISO weeks 2020-01 (ends Sunday 2020-01-05) and 2020-02; neither is the real current week.
+    const SUNDAY = new Date('2020-01-05T23:59:59Z');
+    const MONDAY = new Date('2020-01-06T00:00:01Z');
+    const OLD = currentWeekId(SUNDAY);
+    const NEW = currentWeekId(MONDAY);
+
+    const pointsIn = async (week: number, player: string) =>
+      (
+        await pool.query<{ points: number }>(
+          'SELECT points FROM league_members WHERE week_id = $1 AND player_id = $2',
+          [week, player],
+        )
+      ).rows[0].points;
+    const resultWeek = async (matchId: string) =>
+      (await pool.query<{ week_id: number }>('SELECT week_id FROM match_results WHERE match_id = $1', [matchId]))
+        .rows[0].week_id;
+
+    beforeEach(async () => {
+      expect([OLD, NEW]).toEqual([202001, 202002]);
+      for (const weekId of [OLD, NEW]) {
+        for (const playerId of ['p1', 'p2']) await addMember(pool, { playerId, leagueId: 7, weekId });
+      }
+      vi.useFakeTimers({ toFake: ['Date'] });
+    });
+
+    it('6. reported Sunday 23:59:59, confirmed Monday 00:00:01: +1 in the old week only; retries add nothing', async () => {
+      const m = newMatchId();
+      vi.setSystemTime(SUNDAY);
+      expect((await report('p1', m, 'p2', 'p1')).statusCode).toBe(202);
+
+      vi.setSystemTime(MONDAY);
+      expect((await report('p2', m, 'p1', 'p1')).statusCode).toBe(201);
+      expect((await report('p1', m, 'p2', 'p1')).json()).toEqual({ status: 'duplicate' });
+      expect((await report('p2', m, 'p1', 'p1')).json()).toEqual({ status: 'duplicate' });
+
+      expect(await resultWeek(m)).toBe(OLD);
+      expect(await pointsIn(OLD, 'p1')).toBe(1);
+      expect(await pointsIn(NEW, 'p1')).toBe(0);
+      expect(await countRows(pool, 'match_results', m)).toBe(1);
+    });
+
+    it('6b. first report stored before migration 003 (no week_id): week taken from its created_at', async () => {
+      const m = newMatchId();
+      await pool.query(
+        `INSERT INTO match_reports (match_id, reporter_id, opponent_id, winner_id, created_at)
+         VALUES ($1, 'p1', 'p2', 'p1', $2)`,
+        [m, SUNDAY.toISOString()],
+      );
+      vi.setSystemTime(MONDAY);
+      expect((await report('p2', m, 'p1', 'p1')).statusCode).toBe(201);
+      expect(await resultWeek(m)).toBe(OLD);
+      expect(await pointsIn(OLD, 'p1')).toBe(1);
+      expect(await pointsIn(NEW, 'p1')).toBe(0);
+    });
   });
 });

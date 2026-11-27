@@ -65,3 +65,29 @@ Got:      `.runs/` was git-ignored, so `evidence/*.txt` cited files (e.g. `.runs
           Grepped it for password/secret/token/postgres:// first: only V8 function names in the cpuprofile.
 Accepted:
 Rejected:
+
+## 6. Targeted corrections 1-3 to the docs (2026-11-27, Claude Code / Claude Opus 5.5)
+Prompt:   three pasted correction briefs (LOADTEST only; OPS/DESIGN/CHANGE-RESPONSE; PRD/CAPACITY/ROADMAP/README),
+          each "no code, no evidence changes, no invented numbers, no commit".
+Got:      Payout cap and manual approval as Must (value left to the owner); Leagues on / Coins on gates with a fixed
+          launch date; weekly members as scenarios (0.6M / 1.2M / 4.2M -> 12k / 24k / 84k leagues, rehearse at 4.2M);
+          4-7 corrected to 4-8 vCPU (3.58 / 0.5 = 7.2); scale-down kept as a candidate trigger with a check and rollback.
+          While checking README against the code it found the week-boundary bug: report_match() used the second
+          report's week, so Sunday 23:59:59 + Monday 00:00:01 counted in the new week. Documented, not fixed (no code).
+          Also caught its own unsourced "540k new players" (600k x 90%, never given) and replaced it with <= 600k.
+Accepted:
+Rejected: sizing CPU on 4.2M weekly members (requests follow DAU); writing a cap value or an AI price (not in repo).
+
+## 7. Phase 3 items: week-boundary fix and evidence checks (2026-11-27, Claude Code / Claude Opus 5.5)
+Prompt:   "do it by yourself" (the open Phase 3 items from correction 3).
+Got:      Migration 003: match_reports.week_id; report_match() records the result and the point in the first report's
+          week (pre-003 rows: UTC ISO week of created_at). Seed writes week_id. Tests 6 and 6b (fake Date, Sunday
+          23:59:59 -> Monday 00:00:01, retries in the new week return duplicate). Both fail without 003
+          (expected 202001, received 202002) and pass with it: 15/15.
+          Storage Box: Hetzner lists BX11 at EUR 3.20/month excl. VAT; 3.81 is with 19% German VAT. Both were right.
+          evidence/04-profile.txt line 52 cites memory.events from .runs/03-knee/snapshots.txt, which has no
+          memory.events section: that claim is unsupported (LOADTEST already says "unsampled"). OOM counters exist
+          only for runs 11-13; 08-10 reach mem_current 1024 MiB (samples.csv) but have no OOM counter.
+          Left as is (historical evidence): see the notes above.
+Accepted:
+Rejected:

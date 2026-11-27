@@ -53,16 +53,16 @@ const SQL = {
            at + interval '20 seconds'
       FROM m
   )
-  INSERT INTO match_reports (match_id, reporter_id, opponent_id, winner_id, created_at)
-  SELECT match_id, r.reporter, r.opponent, CASE WHEN a_wins THEN pa ELSE pb END, r.at
+  INSERT INTO match_reports (match_id, reporter_id, opponent_id, winner_id, created_at, week_id)
+  SELECT match_id, r.reporter, r.opponent, CASE WHEN a_wins THEN pa ELSE pb END, r.at, week_id
     FROM m CROSS JOIN LATERAL (VALUES (pa, pb, at), (pb, pa, at + interval '20 seconds')) r(reporter, opponent, at)`,
   disputed: `${matchCte(idExpr('d'))}
-  INSERT INTO match_reports (match_id, reporter_id, opponent_id, winner_id, created_at)
-  SELECT match_id, r.reporter, r.opponent, r.reporter, r.at   -- each claims the win
+  INSERT INTO match_reports (match_id, reporter_id, opponent_id, winner_id, created_at, week_id)
+  SELECT match_id, r.reporter, r.opponent, r.reporter, r.at, week_id   -- each claims the win
     FROM m CROSS JOIN LATERAL (VALUES (pa, pb, at), (pb, pa, at + interval '20 seconds')) r(reporter, opponent, at)`,
   half: `${matchCte(idExpr('h'))}
-  INSERT INTO match_reports (match_id, reporter_id, opponent_id, winner_id, created_at)
-  SELECT match_id, pa, pb, CASE WHEN a_wins THEN pa ELSE pb END, at FROM m`,
+  INSERT INTO match_reports (match_id, reporter_id, opponent_id, winner_id, created_at, week_id)
+  SELECT match_id, pa, pb, CASE WHEN a_wins THEN pa ELSE pb END, at, week_id FROM m`,
 };
 
 async function inChunks(pool: pg.Pool, kind: keyof typeof SQL, total: number, weekId: number) {
