@@ -5,18 +5,20 @@ Stack: Node 22, TypeScript, Fastify, pg (raw SQL), Postgres 16, Vitest, k6.
 
 Rules
 1. Scope = ONE write endpoint + ONE read endpoint + real Postgres + README. Nothing else.
-   Why:
+   Why: The brief rewards a working proof of the riskiest decision, not extra features; this protects the six-hour cap.
 2. Never invent numbers. Any figure in LOADTEST.md / CAPACITY.md must come from a file in evidence/ or from math shown in the doc.
-   Why:
+   Why: Keep measured, derived and estimated numbers distinguishable and reviewable against raw evidence.
 3. Coin/points writes are atomic SQL (points = points + 1), never read-modify-write in app code.
-   Why:
+   Why: Concurrent wins must not lose increments; database atomicity is simpler than app-level coordination.
 4. Every write path must be safe to receive twice. Prove it with a test.
-   Why:
+   Why: Mobile retries and simultaneous reports must not award points twice; a regression test checks the invariant.
 5. Doc page caps (1 page = 500 words): PRD 500, DESIGN 1000, CAPACITY 500, LOADTEST 500, OPS 500, ROADMAP 500, CHANGE-RESPONSE 500, AI-NOTES 250. Run `make docs-check` before finishing.
-   Why:
+   Why: Reviewers stop at the page caps; automated checks make compliance reproducible.
 6. Keep prompts that mattered: append to ai/PROMPT-LOG.md (prompt, what I accepted, what I rejected and how I found the problem).
-   Why:
+   Why: Expose AI mistakes, human judgment and verification rather than only the finished output.
 7. No secrets in the repo. Config via env vars, `.env.example` only.
-   Why:
+   Why: Prevent credential leakage in a shareable repository; keep deployment configuration outside code.
 8. Ask me before adding any dependency not listed above.
-   Why:
+   Why: Keep dependencies and operational burden proportionate for one engineer; require an explicit trade-off before adding one.
+
+These rationales are reconstructed from the brief and the recorded workflow. Claude web drafted specs and reviewed documents; Claude Code used the root instructions for implementation and tests; ChatGPT reviewed repository snapshots and produced bounded correction prompts. See [prompt log](PROMPT-LOG.md). No additional hooks or custom skills are evidenced in this repository.

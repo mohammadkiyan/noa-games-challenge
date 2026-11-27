@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Fails if any doc is over its word cap (1 page = 500 words).
 # Caps below are authoritative (see CLAUDE.md rule 5). Any other .md that declares
-# <!-- cap: N words --> is checked against its declared cap.
+# <!-- cap: N words --> is checked against its declared cap, except verbatim transcripts.
 # A "word" is any whitespace-separated token after stripping HTML comments, as `wc -w`
 # counts it. Table pipes count: a reviewer counting the page with wc gets the same number.
 set -euo pipefail
@@ -30,6 +30,8 @@ done
 while IFS= read -r f; do
   f="${f#./}"
   cap="${CAPS[$f]:-}"
+  # Historical quoted documents are evidence, not separately capped deliverables.
+  if [[ -z "$cap" && "$f" == ai/transcripts/* ]]; then continue; fi
   if [[ -z "$cap" ]]; then
     cap=$(grep -oP '<!--\s*cap:\s*\K[0-9]+' "$f" | head -1 || true)
     [[ -n "$cap" ]] || continue
