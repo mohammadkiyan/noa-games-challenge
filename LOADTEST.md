@@ -3,45 +3,49 @@
 Figures: `evidence/`; raw data: `.runs/`.
 
 ## 1. Scenario and mix
-k6 arrival-rate (`slice/loadtest/scenario.js`): offered load stays fixed when the server slows; unsent requests count as dropped.
-- **80% leaderboard reads:** polling dominates (CAPACITY C3).
-- **20% reports, in concurrent pairs** (tests the advisory lock): one 201 and one 202 per pair.
-- **~1% duplicates:** 200, no points added.
-- Not covered: joins, JWT, wallet, week close.
+k6 arrival-rate (`slice/loadtest/scenario.js`): fixed offered load; unstarted iterations are dropped.
+- **80% leaderboard reads** (CAPACITY C3); **20% reports** as concurrent agreeing pairs (advisory lock), expecting 201 + 202; **~1% duplicates**, expecting 200.
+- Not covered: disagreements, joins, JWT, wallet, week close.
 
-**Target:** 540 rps (CAPACITY §2). **Knee:** +100 rps/min until p95 > 300 ms or errors > 1% (looser than the SLO).
+k6 checks status codes only; `slice/test/reportMatch.test.ts` proves duplicate safety, single results, atomic points and disputes.
+
+**Target:** 540 rps (CAPACITY §2). **Knee:** +100 rps/min until p95 > 300 ms or errors > 1%.
 
 ## 2. Machine and data
-Laptop i7-1255U; app and Postgres 16 in one container, `--cpus=1`, 1 GiB, no swap; k6 on the same host. Seed: 60k players, 1,200 leagues, 1.44M results, 2.889M reports, 779 MiB (`seed.txt`); 852 MiB by run 12.
+Laptop i7-1255U; app and Postgres 16 in one container: `--cpus=1` quota (not a dedicated vCPU), 1 GiB, no swap; k6 on the host. Seed: 60k players, 779 MiB (`seed.txt`), 852 by run 12.
 
 ## 3. Results
-Target 540 rps, 0% errors:
-- **02 baseline:** p95 6.0 / p99 10.0 ms, CPU 79.6%, 0 dropped.
-- **07 + SQL function:** 3.6 / 32.4 ms, CPU 74.4%, **32 dropped**: zero errors ≠ all load served.
-- **12 + cache:** 3.8 / 5.9 ms, CPU 56.4%, 0 dropped.
+120 s hold, ms; Errors = failed HTTP requests:
 
-Knee (p95 at 800): **03** 800 (79.6 ms) · **08** 800 (12.9 ms) · **11** 1,200 (3.8 ms). Run 11 at 1,300: 1,243 achieved, p95 576 ms.
+| Run | Target | Achieved | p95 | p99 | Errors | Dropped | CPU |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 02 baseline | 540 | 540.9 | 6.0 | 10.0 | 0% | 0 | 79.6% |
+| 07 +function | 540 | 540.8 | 3.6 | 32.4 | 0% | 32 | 74.4% |
+| 12 +cache | 540 | 541.1 | 3.8 | 5.9 | 0% | 0 | 56.4% |
+
+Dropped = unsent iterations (a read or a 2–3-request pair); 0% errors ≠ full load.
+
+Knee: **03** 800; **08** 800; **11** 1,200 (one cache-on run). Run 11 failed at 1,300 (p95 576 ms, CPU 86.7%; cause unknown).
 
 ## 4. Bottleneck and fix
-**Bottleneck: the CPU quota** (`04-profile.txt`). At 700 rps: CPU 92%, throttled 31% of periods; pool wait was a symptom. Memory, disk, connections: not limiting. 81% of Postgres CPU was outside statement execution; reports were 20% of requests but 60% of round trips.
+**Initial bottleneck: CPU quota** (run 03, `04-profile.txt`): at 700 rps CPU 92%, throttled ~31%; pool wait and loop delay were symptoms. Disk and connections were not limiting; memory.max hits unsampled. Reports: 20% of requests, 60% of round trips. The ~81% non-execution Postgres CPU is an estimate mixing scopes (step-5 split, whole-run `pg_stat_statements`).
 
-**Fix: `report_match()`** (migration 002): one round trip instead of ~6, same guarantees (advisory lock held to commit, `ON CONFLICT` → `duplicate`, result row and `points = points + 1` in one transaction).
+**Fix: `report_match()`** (migration 002): one round trip instead of ~6. **Impact (03 → 08):** p95 at 800 fell 79.6 → 12.9 ms, throttling 74.5% → 36.0%; **the knee stayed at 800** (825 failed, run 10).
 
-**Impact (03 → 08, same protocol):** p95 at 800 fell 79.6 → 12.9 ms, throttling 74.5% → 36.0%, but **the knee stayed at 800** (825 failed, run 10). At target, p99 rose 10.0 → 32.4 ms, confounded by a cold page cache (block reads 0.012 → 0.614 ms).
+**Secondary: page cache.** The 1 GiB cgroup ran full (03: 999 MiB, anon 82, `samples.csv`). Run 07's p99 rise coincided with block reads slowing 0.012 → 0.614 ms. Runs 08–12 hit memory.max, no OOM. Confounders: cold restarts, database growth, uneven warm-up.
 
-**Cache** (2 s TTL) cuts SQL per read, not requests: 40.7% of reads skipped SQL (run 12). The 1,200 knee is one run, confounded by a warm-up and a larger database.
+**Cache** (2 s TTL): 40.7% of reads skipped SQL (run 12).
 
 ## 5. Reproduce
 ```sh
 make box-up && make box-seed
 make measure PROFILE=knee KNEE_START=400 KNEE_STEP=100 KNEE_WARMUP=60 LABEL=knee-cache
 ```
-`make box-up LEADERBOARD_CACHE_MS=0` turns the cache off. Tests today's code only: no run recorded its git revision; the baseline (02–04) is not in history.
+Measures today's code only: runs recorded `git=none`; the baseline (02–04) is not in history.
 
 ## 6. What this does not tell
-- **Cloud CPU:** run 13 (interrupted, pinned to one logical CPU, `.runs/13-knee-pcore/k6.txt`): p95 167 ms at 600 rps vs 4.1 ms unpinned; effect size unknown.
-- **Repeatability:** the cache-off 800 step failed once from cold (run 09).
-- **Production:** no TLS, Caddy, multi-process, replica, network.
-- **Scale:** 60k players, not 600k; 2-minute holds; synthetic cache locality.
+- **Cloud CPU:** run 13 (interrupted, pinned to one logical CPU, `.runs/13-knee-pcore/k6.txt`): p95 167 ms at 600 rps vs 4.1 ms unpinned (run 11).
+- **Repeatability:** one run per knee; cache-off 800 failed once from cold (run 09).
+- **Scope:** no TLS, Caddy, replica, network; 60k of 600k players; 2-minute holds.
 
-1,200 rps is not production capacity; 840 is an estimate (CAPACITY §3); launch sizing uses 800 (§7). 2,150 and 5,375 rps stay unverified until the CHANGE-RESPONSE gates pass.
+1,200 rps is not production capacity; launch sizing uses 800 (CAPACITY §7); 2,150 and 5,375 rps stay unverified until CHANGE-RESPONSE gates pass.
